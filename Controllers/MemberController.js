@@ -1,7 +1,6 @@
 const Member = require("../models/Member");
-const mongoose = require("mongoose"); // أضف هذا السطر في بداية الملف
+const mongoose = require("mongoose");
 
-// Create a new member (API JSON response)
 exports.createMember = async (req, res, next) => {
   try {
     const {
@@ -96,7 +95,10 @@ exports.renderEditMemberPage = async (req, res, next) => {
     if (!editItem) {
       return res.status(404).send("Member not found");
     }
-    res.render("members", { items, editItem });
+    const membershipRequests = await MembershipRequest.find().sort({
+      createdAt: -1,
+    });
+    res.render("members", { items, editItem, membershipRequests });
   } catch (err) {
     next(err);
   }
