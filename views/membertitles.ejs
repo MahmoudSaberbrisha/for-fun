@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('memberTitles.title') || 'Member Titles' %></title>
+    <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" />
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        max-height: 600px !important;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #222;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .sidebar {
+        min-width: 220px;
+        background: #2e7d32;
+        color: #fff;
+        padding: 30px 20px;
+        min-height: 100vh;
+      }
+      .main-content {
+        flex: 1;
+        padding: 40px 60px;
+        background: rgba(255, 255, 255, 0.95);
+        min-height: 100vh;
+      }
+      h1 {
+        color: #2e7d32;
+        margin-bottom: 30px;
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+      }
+      form {
+        background: #f1f8e9;
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.07);
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      form input[type="text"] {
+        padding: 10px 14px;
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        font-size: 1rem;
+        width: 260px;
+        background: #fff;
+        transition: border 0.2s;
+      }
+      form input[type="text"]:focus {
+        border: 1.5px solid #388e3c;
+        outline: none;
+      }
+      form button,
+      form a {
+        background: #2e7d32;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 22px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        margin-left: 8px;
+        transition: background 0.2s;
+      }
+      form button:hover,
+      form a:hover {
+        background: #388e3c;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.07);
+      }
+      th,
+      td {
+        padding: 16px 14px;
+        text-align: left;
+      }
+      th {
+        background: #388e3c;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) {
+        background: #f1f8e9;
+      }
+      tr:hover {
+        background: #e0f2f1;
+      }
+      td a {
+        color: #2e7d32;
+        font-weight: 500;
+        margin-right: 12px;
+        text-decoration: underline;
+        transition: color 0.2s;
+      }
+      td a:hover {
+        color: #1b5e20;
+      }
+      td form {
+        display: inline;
+        padding: 0;
+        margin: 0;
+        background: none;
+        box-shadow: none;
+      }
+      td form button {
+        background: #c62828;
+        color: #fff;
+        padding: 7px 16px;
+        border-radius: 5px;
+        font-size: 0.97rem;
+        margin-left: 0;
+      }
+      td form button:hover {
+        background: #b71c1c;
+      }
+      @media (max-width: 900px) {
+        .main-content {
+          padding: 20px 8px;
+        }
+        form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        form input[type="text"] {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="padding-bottom: 35px">
+      <div class="sidebar" style="margin-right: -20px">
+        <%- include('partials/sidebar') %>
+      </div>
+      <div class="main-content">
+        <h1><%= t('memberTitles.header') || 'Member Titles' %></h1>
+        <form
+          action="<%= editItem ? '/api/membertitles/edit/' + editItem._id : '/api/membertitles' %>"
+          method="POST"
+        >
+          <input
+            type="text"
+            name="name"
+            placeholder="<%= t('memberTitles.namePlaceholder') || 'Enter member title name' %>"
+            value="<%= editItem ? editItem.name : '' %>"
+            required
+          />
+          <button type="submit">
+            <%= editItem ? (t('memberTitles.updateButton') || 'Update') :
+            (t('memberTitles.saveButton') || 'Save') %>
+          </button>
+          <% if (editItem) { %>
+          <a href="/api/membertitles"
+            ><%= t('memberTitles.cancelLink') || 'Cancel' %></a
+          >
+          <% } %>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th><%= t('memberTitles.table.name') || 'Name' %></th>
+              <th><%= t('memberTitles.table.actions') || 'Actions' %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(item => { %>
+            <tr>
+              <td><%= item.name %></td>
+              <td>
+                <a href="/api/membertitles/edit/<%= item._id %>"
+                  ><%= t('memberTitles.table.edit') || 'Edit' %></a
+                >
+                <form
+                  action="/api/membertitles/delete/<%= item._id %>"
+                  method="POST"
+                  style="display: inline"
+                >
+                  <button
+                    type="submit"
+                    onclick="return confirm('<%= t('memberTitles.table.deleteConfirm') || 'Are you sure you want to delete this item?' %>');"
+                  >
+                    <%= t('memberTitles.table.delete') || 'Delete' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

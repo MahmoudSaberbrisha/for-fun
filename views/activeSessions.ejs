@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('activeSessions.title') || 'Active Sessions' %></title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #e8f5e9;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .container {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        background: linear-gradient(90deg, #e8f5e9 0%, #ffffff 100%);
+      }
+      .scroll-container {
+        flex: 1;
+        width: 100%;
+        max-width: 100vw;
+        height: 100vh;
+        overflow: auto;
+        border: none;
+        padding: 40px 40px 40px 40px;
+        box-sizing: border-box;
+        background: transparent;
+      }
+      h2 {
+        color: #388e3c;
+        margin-bottom: 24px;
+        font-weight: bold;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 24px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(56, 142, 60, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #c8e6c9;
+        padding: 12px 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #a5d6a7;
+        color: #1b5e20;
+        font-weight: 600;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .button {
+        padding: 8px 16px;
+        margin-right: 5px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background 0.2s;
+      }
+      .button.add {
+        background-color: #43a047;
+        color: white;
+      }
+      .button.add:hover {
+        background-color: #388e3c;
+      }
+      .button:not(.add) {
+        background: #e0f2f1;
+        color: #388e3c;
+      }
+      .button:not(.add):hover {
+        background: #b2dfdb;
+      }
+      .form-group {
+        margin-bottom: 14px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 4px;
+        color: #388e3c;
+        font-weight: 500;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #a5d6a7;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background: #f1f8e9;
+        font-size: 1em;
+      }
+      .search-input {
+        margin-bottom: 18px;
+        padding: 8px;
+        width: 320px;
+        border: 1px solid #a5d6a7;
+        border-radius: 4px;
+        background: #f1f8e9;
+        color: #388e3c;
+        font-size: 1em;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      ul li {
+        margin-bottom: 6px;
+      }
+      #addTopicModal,
+      #addVotingItemModal {
+        display: none;
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        border: 2px solid #a5d6a7;
+        border-radius: 10px;
+        padding: 28px 24px;
+        z-index: 1000;
+        box-shadow: 0 4px 24px rgba(56, 142, 60, 0.18);
+        min-width: 340px;
+      }
+      #addTopicModal h3,
+      #addVotingItemModal h3 {
+        color: #388e3c;
+        margin-bottom: 18px;
+      }
+      @media (max-width: 800px) {
+        .scroll-container {
+          padding: 10px;
+        }
+        table,
+        .search-input {
+          font-size: 0.95em;
+        }
+        #addTopicModal,
+        #addVotingItemModal {
+          min-width: 90vw;
+          padding: 18px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: 20px">
+      <%- include('partials/sidebar') %>
+      <div class="scroll-container">
+        <h2>الجلسات النشطة (Active Sessions)</h2>
+        <input
+          type="text"
+          id="searchActiveSessions"
+          class="search-input"
+          placeholder="بحث (Search Active Sessions)"
+        />
+        <table id="activeSessionsTable">
+          <thead>
+            <tr>
+              <th>رقم الجلسه</th>
+              <th>تاريخ الجلسه</th>
+              <th>اليوم</th>
+              <th>وقت الجلسه</th>
+              <th>مده الجلسه بالدقيقه</th>
+              <th>مكان انعقاد الجلسه</th>
+              <th>مقرر الجلسه</th>
+              <th>الموضوع</th>
+              <th>إضافة موضوع</th>
+              <th>إضافة بند تصويت</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (sessions && sessions.length > 0) { %> <%
+            sessions.forEach(function(session) { %>
+            <tr data-id="<%= session._id %>">
+              <td><%= session.sessionNumber %></td>
+              <td>
+                <%= session.date ? session.date.toISOString().substring(0, 10) :
+                '' %>
+              </td>
+              <td><%= session.day %></td>
+              <td><%= session.time %></td>
+              <td><%= session.duration %></td>
+              <td><%= session.location %></td>
+              <td><%= session.secretary %></td>
+              <td><%= session.topic %></td>
+              <td>
+                <button
+                  class="button add"
+                  onclick="showAddTopicForm('<%= session._id %>')"
+                >
+                  إضافة موضوع
+                </button>
+              </td>
+              <td>
+                <button
+                  class="button add"
+                  onclick="showAddVotingItemForm('<%= session._id %>')"
+                >
+                  إضافة بند تصويت
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="10" style="background: #f1f8e9">
+                <strong style="color: #388e3c">بنود التصويت:</strong>
+                <% if (session.votingItems && session.votingItems.length > 0) {
+                %>
+                <ul>
+                  <% session.votingItems.forEach(function(item, index) { %>
+                  <li>
+                    <span style="color: #2e7d32"><%= item.title %></span> - <%=
+                    item.description %>
+                    <button
+                      class="button"
+                      onclick="vote('<%= session._id %>', <%= index %>, 'yes')"
+                    >
+                      نعم
+                    </button>
+                    <button
+                      class="button"
+                      onclick="vote('<%= session._id %>', <%= index %>, 'no')"
+                    >
+                      لا
+                    </button>
+                    <span
+                      >التصويت الحالي: نعم (<%= item.votes ?
+                      item.votes.filter(function(v) { return v === 'yes';
+                      }).length : 0 %>), لا (<%= item.votes ?
+                      item.votes.filter(function(v) { return v === 'no';
+                      }).length : 0 %>)</span
+                    >
+                  </li>
+                  <% }) %>
+                </ul>
+                <% } else { %>
+                <em style="color: #757575">لا توجد بنود تصويت مضافة بعد.</em>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %> <% } else { %>
+            <tr>
+              <td colspan="10" style="text-align: center; color: #757575">
+                لا توجد جلسات نشطة حالياً
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+
+        <!-- Add Topic Form Modal -->
+        <div id="addTopicModal">
+          <h3>إضافة موضوع للجلسة</h3>
+          <form id="addTopicForm">
+            <input type="hidden" id="topicSessionId" name="sessionId" />
+            <div class="form-group">
+              <label for="topicTitle">عنوان الموضوع</label>
+              <input type="text" id="topicTitle" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="topicDescription">وصف الموضوع</label>
+              <textarea
+                id="topicDescription"
+                name="description"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="button add">إضافة</button>
+            <button type="button" class="button" onclick="closeAddTopicForm()">
+              إلغاء
+            </button>
+          </form>
+        </div>
+
+        <!-- Add Voting Item Form Modal -->
+        <div id="addVotingItemModal">
+          <h3>إضافة بند تصويت للجلسة</h3>
+          <form id="addVotingItemForm">
+            <input type="hidden" id="votingSessionId" name="sessionId" />
+            <div class="form-group">
+              <label for="votingItemTitle">عنوان البند</label>
+              <input type="text" id="votingItemTitle" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="votingItemDescription">وصف البند</label>
+              <textarea
+                id="votingItemDescription"
+                name="description"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="button add">إضافة</button>
+            <button
+              type="button"
+              class="button"
+              onclick="closeAddVotingItemForm()"
+            >
+              إلغاء
+            </button>
+          </form>
+        </div>
+
+        <script>
+          // Search active sessions
+          document
+            .getElementById("searchActiveSessions")
+            .addEventListener("input", function () {
+              const filter = this.value.toLowerCase();
+              const rows = document.querySelectorAll(
+                "#activeSessionsTable tbody tr"
+              );
+              rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                let match = false;
+                cells.forEach((cell) => {
+                  if (cell.textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                  }
+                });
+                row.style.display = match ? "" : "none";
+              });
+            });
+
+          // Show add topic form
+          function showAddTopicForm(sessionId) {
+            document.getElementById("topicSessionId").value = sessionId;
+            document.getElementById("addTopicModal").style.display = "block";
+          }
+
+          // Close add topic form
+          function closeAddTopicForm() {
+            document.getElementById("addTopicForm").reset();
+            document.getElementById("addTopicModal").style.display = "none";
+          }
+
+          // Show add voting item form
+          function showAddVotingItemForm(sessionId) {
+            document.getElementById("votingSessionId").value = sessionId;
+            document.getElementById("addVotingItemModal").style.display =
+              "block";
+          }
+
+          // Close add voting item form
+          function closeAddVotingItemForm() {
+            document.getElementById("addVotingItemForm").reset();
+            document.getElementById("addVotingItemModal").style.display =
+              "none";
+          }
+
+          // Handle add topic form submission
+          document
+            .getElementById("addTopicForm")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+              const sessionId = document.getElementById("topicSessionId").value;
+              const title = document.getElementById("topicTitle").value;
+              const description =
+                document.getElementById("topicDescription").value;
+              try {
+                const response = await fetch(
+                  `/api/sessions/${sessionId}/topics`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description }),
+                  }
+                );
+                if (response.ok) {
+                  alert("تم إضافة الموضوع بنجاح");
+                  closeAddTopicForm();
+                  location.reload();
+                } else {
+                  alert("فشل في إضافة الموضوع");
+                }
+              } catch (error) {
+                alert("خطأ في الاتصال بالخادم");
+              }
+            });
+
+          // Handle add voting item form submission
+          document
+            .getElementById("addVotingItemForm")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+              const sessionId =
+                document.getElementById("votingSessionId").value;
+              const title = document.getElementById("votingItemTitle").value;
+              const description = document.getElementById(
+                "votingItemDescription"
+              ).value;
+              try {
+                const response = await fetch(
+                  `/api/sessions/${sessionId}/voting-items`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description }),
+                  }
+                );
+                if (response.ok) {
+                  alert("تم إضافة بند التصويت بنجاح");
+                  closeAddVotingItemForm();
+                  location.reload();
+                } else {
+                  alert("فشل في إضافة بند التصويت");
+                }
+              } catch (error) {
+                alert("خطأ في الاتصال بالخادم");
+              }
+            });
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

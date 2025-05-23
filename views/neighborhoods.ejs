@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>"dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('title') %></title>
+    <!-- <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" /> -->
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <!-- <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" /> -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #222;
+      }
+      .container {
+        width: 100vw;
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+      }
+      .main-content {
+        flex: 1;
+        padding: 40px 5vw 40px 5vw;
+        background: rgba(255,255,255,0.95);
+        min-height: 100vh;
+      }
+      h1 {
+        color: #219150;
+        margin-bottom: 1.5em;
+        font-size: 2.5em;
+        letter-spacing: 1px;
+        text-align: left;
+      }
+      form {
+        background: #f4fff7;
+        border: 1px solid #b2dfdb;
+        border-radius: 12px;
+        padding: 24px 32px 16px 32px;
+        margin-bottom: 2em;
+        box-shadow: 0 2px 16px rgba(33, 150, 83, 0.08);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-items: flex-end;
+      }
+      form input, form select {
+        padding: 10px 14px;
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        font-size: 1em;
+        margin-right: 12px;
+        background: #fff;
+        min-width: 180px;
+        outline: none;
+        transition: border 0.2s;
+      }
+      form input:focus, form select:focus {
+        border: 1.5px solid #219150;
+      }
+      form button[type="submit"] {
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 28px;
+        font-size: 1em;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+        margin-right: 10px;
+      }
+      form button[type="submit"]:hover {
+        background: linear-gradient(90deg, #219150 0%, #43e97b 100%);
+      }
+      form a {
+        color: #219150;
+        text-decoration: underline;
+        font-size: 1em;
+        margin-left: 10px;
+      }
+      .error-messages {
+        background: #ffebee;
+        border: 1px solid #e57373;
+        color: #c62828;
+        border-radius: 6px;
+        padding: 10px 18px;
+        margin-bottom: 1.5em;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(33, 150, 83, 0.08);
+      }
+      th, td {
+        padding: 16px 12px;
+        text-align: left;
+      }
+      th {
+        background: #219150;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.1em;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) {
+        background: #f4fff7;
+      }
+      tr:hover {
+        background: #e0f2f1;
+      }
+      td a {
+        color: #219150;
+        text-decoration: none;
+        border: 1px solid #219150;
+        padding: 6px 14px;
+        border-radius: 5px;
+        display: inline-block;
+        margin-right: 8px;
+        font-weight: 500;
+        background: #e8f5e9;
+        transition: background 0.2s, color 0.2s;
+      }
+      td a:hover {
+        background: #219150;
+        color: #fff;
+      }
+      td form {
+        display: inline;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
+      td form button[type="submit"] {
+        background: #e57373;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 6px 14px;
+        font-size: 1em;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+        margin-left: 0;
+      }
+      td form button[type="submit"]:hover {
+        background: #c62828;
+      }
+      @media (max-width: 900px) {
+        .main-content {
+          padding: 24px 2vw;
+        }
+        form {
+          flex-direction: column;
+          gap: 10px;
+        }
+        form input, form select, form button, form a {
+          min-width: 100%;
+          margin-right: 0;
+        }
+        table, thead, tbody, th, td, tr {
+          display: block;
+        }
+        th, td {
+          padding: 10px 6px;
+        }
+        tr {
+          margin-bottom: 1em;
+        }
+      }
+    </style>
+    <script>
+      // Disable submit button on form submit to prevent multiple submissions
+      function disableSubmitButton(form) {
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = '<%= t("form.saveButton") %>...';
+        }
+        return true;
+      }
+    </script>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: 20px;">
+      <%- include('partials/sidebar') %>
+      <div class="main-content">
+        <h1><%= t('header') %></h1>
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+          <div class="error-messages">
+            <ul>
+              <% errors.forEach(function(error) { %>
+                <li><%= error.msg %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form
+          action="<%= editItem ? '/api/neighborhoods/edit/' + editItem._id : '/api/neighborhoods' %>"
+          method="POST"
+          onsubmit="return disableSubmitButton(this);"
+        >
+          <input
+            type="text"
+            name="name"
+            placeholder="<%= t('form.namePlaceholder') %>"
+            value="<%= editItem ? editItem.name : '' %>"
+            required
+          />
+          <input
+            type="number"
+            name="order"
+            placeholder="<%= t('form.orderPlaceholder') %>"
+            value="<%= editItem && editItem.order !== undefined ? editItem.order : '' %>"
+          />
+          <select name="city" required>
+            <option value=""><%= t('form.citySelect') %></option>
+            <% cities.forEach(city => { %>
+              <option
+                value="<%= city._id %>"
+                <%= editItem && editItem.city && editItem.city.toString() === city._id.toString() ? 'selected' : '' %>
+              >
+                <%= city.name %>
+              </option>
+            <% }) %>
+          </select>
+          <button type="submit"><%= editItem ? t('form.updateButton') : t('form.saveButton') %></button>
+          <% if (editItem) { %>
+          <a href="/api/neighborhoods"><%= t('form.cancelLink') %></a>
+          <% } %>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th><%= t('table.name') %></th>
+              <th><%= t('table.order') %></th>
+              <th><%= t('table.city') %></th>
+              <th><%= t('table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(item => { %>
+            <tr>
+              <td><%= item.name %></td>
+              <td><%= item.order !== undefined ? item.order : '' %></td>
+              <td><%= item.city ? item.city.name : '' %></td>
+              <td>
+                  <a
+                  href="/api/neighborhoods/edit/<%= item._id %>"
+                  >
+                  <%= t('table.edit') %>
+                  </a>
+                <form
+                  action="/api/neighborhoods/delete/<%= item._id %>"
+                  method="POST"
+                  onsubmit="return confirm('<%= t('table.deleteConfirm') %>');"
+                >
+                  <button
+                    type="submit"
+                  >
+                    <%= t('table.delete') %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

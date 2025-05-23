@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Neighborhoods</title>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px;
+      }
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Neighborhoods</h1>
+    <input type="text" id="nameInput" placeholder="Enter neighborhood name" />
+    <input type="number" id="orderInput" placeholder="Enter order" />
+    <select id="citySelect">
+      <option value="">Select City</option>
+    </select>
+    <button id="saveBtn">Save</button>
+    <br /><br />
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Order</th>
+          <th>City</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const apiUrl = "/api/neighborhoods";
+      const cityApiUrl = "/api/cities";
+      const nameInput = document.getElementById("nameInput");
+      const orderInput = document.getElementById("orderInput");
+      const citySelect = document.getElementById("citySelect");
+      const saveBtn = document.getElementById("saveBtn");
+      const dataTableBody = document.querySelector("#dataTable tbody");
+      let editId = null;
+
+      async function fetchCities() {
+        const res = await fetch(cityApiUrl);
+        const cities = await res.json();
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        cities.forEach((city) => {
+          const option = document.createElement("option");
+          option.value = city._id;
+          option.textContent = city.name;
+          citySelect.appendChild(option);
+        });
+      }
+
+      async function fetchData() {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        renderTable(data);
+      }
+
+      function renderTable(data) {
+        dataTableBody.innerHTML = "";
+        data.forEach((item) => {
+          const tr = document.createElement("tr");
+          const nameTd = document.createElement("td");
+          nameTd.textContent = item.name;
+          const orderTd = document.createElement("td");
+          orderTd.textContent = item.order || "";
+          const cityTd = document.createElement("td");
+          cityTd.textContent = item.city ? item.city.name : "";
+          const actionsTd = document.createElement("td");
+
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.onclick = () => {
+            nameInput.value = item.name;
+            orderInput.value = item.order || "";
+            citySelect.value = item.city ? item.city._id : "";
+            editId = item._id;
+            saveBtn.textContent = "Update";
+          };
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.onclick = async () => {
+            if (confirm("Are you sure you want to delete this item?")) {
+              await fetch(`${apiUrl}/${item._id}`, { method: "DELETE" });
+              fetchData();
+            }
+          };
+
+          actionsTd.appendChild(editBtn);
+          actionsTd.appendChild(deleteBtn);
+
+          tr.appendChild(nameTd);
+          tr.appendChild(orderTd);
+          tr.appendChild(cityTd);
+          tr.appendChild(actionsTd);
+          dataTableBody.appendChild(tr);
+        });
+      }
+
+      saveBtn.onclick = async () => {
+        const name = nameInput.value.trim();
+        const order = parseInt(orderInput.value, 10);
+        const city = citySelect.value;
+        if (!name) {
+          alert("Name is required");
+          return;
+        }
+        if (!city) {
+          alert("City selection is required");
+          return;
+        }
+        if (editId) {
+          // Update
+          await fetch(`${apiUrl}/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, order, city }),
+          });
+          editId = null;
+          saveBtn.textContent = "Save";
+        } else {
+          // Create
+          await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, order, city }),
+          });
+        }
+        nameInput.value = "";
+        orderInput.value = "";
+        citySelect.value = "";
+        fetchData();
+      };
+
+      fetchCities();
+      fetchData();
+    </script>
+  </body>
+</html>

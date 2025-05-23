@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <title>لوحة العضو</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      .token {
+        word-wrap: break-word;
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>مرحباً، <%= memberName %>!</h1>
+      <p>تم تسجيل الدخول بنجاح.</p>
+      <h3>رمز التوكن الخاص بك:</h3>
+      <div class="token"><%= token %></div>
+    </div>
+  </body>
+</html>

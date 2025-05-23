@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Active Members</title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
+        min-height: 100vh;
+      }
+      .container {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+      .scroll-container {
+        flex: 1;
+        height: 100vh;
+        overflow: auto;
+        border-left: 4px solid #0a0a0a;
+        border-right: 4px solid #43a047;
+        padding: 32px 24px;
+        background: linear-gradient(120deg, #ffffff 80%, #e3f2fd 100%);
+        box-sizing: border-box;
+      }
+      h1 {
+        text-align: center;
+        color: #000000;
+        margin-bottom: 32px;
+        letter-spacing: 1px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0 4px 24px rgba(33, 150, 243, 0.07);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      thead tr {
+        background: linear-gradient(90deg, #43a047 0%, #2196f3 100%);
+        color: #fff;
+      }
+      th,
+      td {
+        padding: 14px 10px;
+        border-bottom: 1px solid #e3f2fd;
+        text-align: center;
+      }
+      th {
+        font-weight: 600;
+        font-size: 1.05em;
+        letter-spacing: 0.5px;
+      }
+      tbody tr:nth-child(even) {
+        background: #e8f5e9;
+      }
+      tbody tr:nth-child(odd) {
+        background: #e3f2fd;
+      }
+      tbody tr:hover {
+        background: #b2dfdb;
+        transition: background 0.2s;
+      }
+      @media (max-width: 900px) {
+        .scroll-container {
+          padding: 10px 2px;
+        }
+        th,
+        td {
+          padding: 8px 4px;
+          font-size: 0.95em;
+        }
+        h1 {
+          font-size: 1.2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: 20px">
+      <%- include('partials/sidebar') %>
+      <div class="scroll-container">
+        <h1>الأعضاء النشطون</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>رمز المجلس</th>
+              <th>رقم العضوية</th>
+              <th>الاسم</th>
+              <th>نوع العضو</th>
+              <th>المنصب</th>
+              <th>تاريخ التعيين (هجري)</th>
+              <th>بداية الاشتراك</th>
+              <th>الحالة</th>
+              <th>الاسم المختصر</th>
+              <th>رقم الهوية</th>
+              <th>رقم الجوال</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(function(member, idx) { %>
+            <tr>
+              <td><%= member.councilCode %></td>
+              <td><%= member.membershipNumber %></td>
+              <td><%= member.name %></td>
+              <td><%= member.memberType %></td>
+              <td><%= member.position %></td>
+              <td><%= member.appointmentDateHijri %></td>
+              <td>
+                <%= member.subscriptionStartDate ?
+                member.subscriptionStartDate.toISOString().substring(0, 10) : ''
+                %>
+              </td>
+              <td><%= member.status %></td>
+              <td><%= member.shortName %></td>
+              <td><%= member.nationalIdNumber %></td>
+              <td><%= member.phoneNumber %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

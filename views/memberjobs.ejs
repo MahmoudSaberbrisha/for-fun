@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      <%= t('allentities.memberJobs.sectionTitle') || 'Member Jobs' %>
+    </title>
+    <!-- <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" /> -->
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <!-- <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" /> -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f6fff8;
+        min-height: 100vh;
+      }
+      .container {
+        width: 100vw;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 0 0 0;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 40px;
+      }
+      .sidebar-wrapper {
+        flex: 0 0 250px;
+        max-width: 250px;
+      }
+      .main-content {
+        flex: 1 1 auto;
+        max-width: 800px;
+      }
+      h1 {
+        color: #218838;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px #e0ffe0;
+      }
+      form {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(33, 136, 56, 0.08);
+        padding: 30px 40px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 500px;
+      }
+      form input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        background: #f6fff8;
+        transition: border 0.2s;
+      }
+      form input[type="text"]:focus {
+        border: 1.5px solid #218838;
+        outline: none;
+      }
+      form button[type="submit"] {
+        background: #218838;
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-right: 10px;
+      }
+      form button[type="submit"]:hover {
+        background: #176c2a;
+      }
+      form a {
+        color: #218838;
+        text-decoration: none;
+        font-weight: 500;
+        margin-left: 10px;
+        transition: color 0.2s;
+      }
+      form a:hover {
+        color: #176c2a;
+        text-decoration: underline;
+      }
+      table {
+        width: 100vw;
+        max-width: 1100px;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(33, 136, 56, 0.08);
+        margin-bottom: 40px;
+      }
+      th,
+      td {
+        padding: 18px 20px;
+        text-align: left;
+      }
+      th {
+        background: #218838;
+        color: #fff;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) {
+        background: #f6fff8;
+      }
+      tr:hover td {
+        background: #e8f5e9;
+        transition: background 0.2s;
+      }
+      td a {
+        color: #218838;
+        text-decoration: none;
+        font-weight: 500;
+        margin-right: 12px;
+        transition: color 0.2s;
+      }
+      td a:hover {
+        color: #176c2a;
+        text-decoration: underline;
+      }
+      td form {
+        display: inline;
+        padding: 0;
+        margin: 0;
+        background: none;
+        box-shadow: none;
+      }
+      td form button {
+        background: #e53935;
+        color: #fff;
+        border: none;
+        padding: 7px 18px;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      td form button:hover {
+        background: #b71c1c;
+      }
+      @media (max-width: 800px) {
+        .container {
+          flex-direction: column;
+          padding: 20px 0 0 0;
+        }
+        .sidebar-wrapper {
+          max-width: 100%;
+          flex: none;
+          margin-bottom: 20px;
+        }
+        .main-content {
+          max-width: 100%;
+        }
+        form,
+        table {
+          max-width: 98vw;
+        }
+        th,
+        td {
+          padding: 12px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+
+    <div class="container" style="padding-top: 20px">
+      <div class="sidebar-wrapper"><%- include('partials/sidebar') %></div>
+      <div class="main-content" style="max-width: 100vw; flex: 1 1 100%">
+        <h1>
+          <%= t('allentities.memberJobs.sectionTitle') || 'Member Jobs' %>
+        </h1>
+        <form
+          action="<%= editItem ? '/api/memberjobs/edit/' + editItem._id : '/api/memberjobs' %>"
+          method="POST"
+        >
+          <input
+            type="text"
+            name="name"
+            placeholder="<%= t('allentities.memberJobs.namePlaceholder') || 'Enter member job name' %>"
+            value="<%= editItem ? editItem.name : '' %>"
+            required
+          />
+          <button type="submit">
+            <%= editItem ? (t('allentities.memberJobs.updateButton') ||
+            'Update') : (t('cities.saveButton') || 'Save') %>
+          </button>
+          <% if (editItem) { %>
+          <a href="/api/memberjobs"
+            ><%= t('allentities.memberJobs.cancelLink') || 'Cancel' %></a
+          >
+          <% } %>
+        </form>
+        <table style="width: 100%">
+          <thead>
+            <tr>
+              <th><%= t('allentities.memberJobs.table.name') || 'Name' %></th>
+              <th>
+                <%= t('allentities.memberJobs.table.actions') || 'Actions' %>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(item => { %>
+            <tr>
+              <td><%= item.name %></td>
+              <td>
+                <a href="/api/memberjobs/edit/<%= item._id %>"
+                  ><%= t('allentities.memberJobs.table.edit') || 'Edit' %></a
+                >
+                <form
+                  action="/api/memberjobs/delete/<%= item._id %>"
+                  method="POST"
+                  style="display: inline"
+                >
+                  <button
+                    type="submit"
+                    onclick="return confirm('<%= t('allentities.memberJobs.table.deleteConfirm') || 'Are you sure you want to delete this item?' %>');"
+                  >
+                    <%= t('allentities.memberJobs.table.delete') || 'Delete' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

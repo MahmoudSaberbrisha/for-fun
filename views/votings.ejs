@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('votings.title') || 'Open Votings' %></title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        color: #222;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .main-content {
+        flex: 1;
+        padding: 40px 5vw 40px 5vw;
+        background: rgba(255,255,255,0.95);
+        min-height: 100vh;
+      }
+      h1, h2, legend {
+        color: #219150;
+        margin-bottom: 16px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      li {
+        background: #f1f8f4;
+        border: 1px solid #b2dfdb;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        padding: 32px 24px;
+        box-shadow: 0 2px 8px rgba(33,145,80,0.07);
+        transition: box-shadow 0.2s;
+      }
+      li:hover {
+        box-shadow: 0 4px 16px rgba(33,145,80,0.15);
+      }
+      fieldset {
+        border: 2px solid #219150;
+        border-radius: 8px;
+        padding: 16px 24px 16px 24px;
+        margin-bottom: 16px;
+        background: #e8f5e9;
+      }
+      input[type="radio"] {
+        accent-color: #219150;
+        margin-right: 8px;
+      }
+      label {
+        font-size: 1.05em;
+        color: #222;
+      }
+      button[type="submit"] {
+        background: linear-gradient(90deg, #219150 60%, #43e97b 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 32px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(33,145,80,0.10);
+        transition: background 0.2s, box-shadow 0.2s;
+      }
+      button[type="submit"]:hover {
+        background: linear-gradient(90deg, #43e97b 60%, #219150 100%);
+        box-shadow: 0 4px 16px rgba(33,145,80,0.18);
+      }
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        color: #219150;
+        background: #e8f5e9;
+        padding: 20px 0 10px 0;
+        border-top: 2px solid #b2dfdb;
+        border-radius: 0 0 16px 16px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+        }
+        .main-content {
+          padding: 24px 2vw;
+        }
+      }
+    </style>
+    <script>
+      // Client-side script to confirm vote submission
+      function confirmVote(event, votingTitle) {
+        if (!confirm('Are you sure you want to vote on "' + votingTitle + '"?')) {
+          event.preventDefault();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container">
+      <%- include('partials/sidebar') %>
+      <div class="main-content">
+        <h1><%= t('votings.header') || 'Open Votings' %></h1>
+        <% if (votings.length === 0) { %>
+        <p>
+          <%= t('votings.noOpenVotings') || 'There are no open votings at the moment.' %>
+        </p>
+        <% } else { %>
+        <ul>
+          <% votings.forEach(function(voting) { %>
+          <li>
+            <h2><%= voting.title %></h2>
+            <p>
+              <strong><%= t('votings.statusLabel') || 'Status:' %></strong>
+              <%= voting.status %>
+            </p>
+            <p>
+              <strong><%= t('votings.createdAtLabel') || 'Created on:' %></strong>
+              <%= new Date(voting.createdAt).toLocaleDateString(lang || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+            </p>
+            <form action="/api/votings/vote/<%= voting._id %>" method="POST" onsubmit="confirmVote(event, '<%- voting.title.replace(/'/g, '&#39;').replace(/"/g, '&quot;') %>')">
+              <fieldset>
+                <legend><%= t('votings.optionsLegend') || 'Options' %></legend>
+                <% voting.options.forEach(function(option, index) { %>
+                <div>
+                  <input
+                    type="radio"
+                    id="option-<%= voting._id %>-<%= index %>"
+                    name="selectedOption"
+                    value="<%= index %>"
+                    required
+                  />
+                  <label for="option-<%= voting._id %>-<%= index %>">
+                    <%= option.optionText %> (<%= option.votes %> <%= t('votings.votesLabel') || 'votes' %>)
+                  </label>
+                </div>
+                <% }) %>
+              </fieldset>
+              <button type="submit">
+                <%= t('votings.voteButton') || 'Vote' %>
+              </button>
+            </form>
+          </li>
+          <% }) %>
+        </ul>
+        <% } %>
+        <footer>
+          <hr />
+          <p>&copy; <%= new Date().getFullYear() %> Open Votings. All rights reserved.</p>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

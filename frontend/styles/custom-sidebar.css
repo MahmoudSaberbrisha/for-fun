@@ -1,0 +1,24 @@
+/* Make the التعريفات button take full width */
+.sidebar .dropdown-toggle {
+  width: 100%;
+  display: block;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Optional: style for dropdown menu inside sidebar */
+.sidebar .dropdown-menu {
+  padding-left: 0;
+
+  margin: 0;
+  list-style: none;
+}
+
+.sidebar .dropdown-menu li a {
+  padding-left: 40px;
+}

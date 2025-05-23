@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>اجتماعات مجلس الاداره النشطة (Active Board Meetings)</title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .container {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+      }
+      .scroll-container {
+        flex: 1;
+        width: 100vw;
+        max-width: 100vw;
+        min-height: 100vh;
+        overflow: auto;
+        border: none;
+        padding: 40px 40px 20px 40px;
+        box-sizing: border-box;
+        background: linear-gradient(120deg, #e8f5e9 60%, #ffffff 100%);
+        box-shadow: 0 0 24px 0 #b2dfdb33;
+        transition: box-shadow 0.3s;
+      }
+      h2 {
+        color: #218c5a;
+        text-align: center;
+        margin-bottom: 30px;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px #b2dfdb44;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 24px;
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px #b2dfdb33;
+        transition: box-shadow 0.3s;
+      }
+      th,
+      td {
+        border: none;
+        padding: 14px 10px;
+        text-align: left;
+        font-size: 1rem;
+        transition: background 0.2s;
+      }
+      th {
+        background: linear-gradient(90deg, #43a047 60%, #e8f5e9 100%);
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) td {
+        background: #e8f5e9;
+      }
+      tr:hover td {
+        background: #c8e6c9;
+        transition: background 0.2s;
+      }
+      .button {
+        padding: 8px 16px;
+        margin-right: 5px;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        background: #43a047;
+        color: #fff;
+        font-weight: 500;
+        box-shadow: 0 2px 8px #b2dfdb33;
+        transition: background 0.2s, transform 0.2s;
+      }
+      .button.add {
+        background: linear-gradient(90deg, #43a047 70%, #66bb6a 100%);
+      }
+      .button:hover,
+      .button:focus {
+        background: #388e3c;
+        transform: translateY(-2px) scale(1.04);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #218c5a;
+        font-weight: 500;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        box-sizing: border-box;
+        background: #f9fff9;
+        font-size: 1rem;
+        transition: border 0.2s;
+      }
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border: 1.5px solid #43a047;
+        outline: none;
+      }
+      .search-input {
+        margin-bottom: 18px;
+        padding: 10px 14px;
+        width: 350px;
+        border: 1px solid #b2dfdb;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: #f9fff9;
+        transition: border 0.2s;
+        box-shadow: 0 1px 4px #b2dfdb22;
+      }
+      .search-input:focus {
+        border: 1.5px solid #43a047;
+        outline: none;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      ul li {
+        margin-bottom: 8px;
+        background: #e8f5e9;
+        border-radius: 6px;
+        padding: 8px 12px;
+        box-shadow: 0 1px 4px #b2dfdb22;
+        transition: background 0.2s;
+      }
+      ul li:hover {
+        background: #c8e6c9;
+      }
+      /* Modal styles */
+      #addTopicModal,
+      #addVotingItemModal {
+        display: none;
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        border: 2px solid #43a047;
+        border-radius: 14px;
+        padding: 28px 32px 20px 32px;
+        z-index: 1000;
+        box-shadow: 0 8px 32px #43a04733;
+        min-width: 340px;
+        max-width: 95vw;
+        animation: modalFadeIn 0.4s;
+      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) scale(1);
+        }
+      }
+      #addTopicModal h3,
+      #addVotingItemModal h3 {
+        color: #218c5a;
+        margin-bottom: 18px;
+        text-align: center;
+      }
+      em {
+        color: #888;
+        font-style: italic;
+      }
+      @media (max-width: 900px) {
+        .scroll-container {
+          padding: 16px 4vw;
+        }
+        table,
+        th,
+        td {
+          font-size: 0.95rem;
+        }
+        .search-input {
+          width: 98vw;
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: 20px">
+      <%- include('partials/sidebar') %>
+      <div class="scroll-container">
+        <h2>الاجتماعات النشطة لمجلس الاداره (Active Board Meetings)</h2>
+        <input
+          type="text"
+          id="searchBoardMeetings"
+          class="search-input"
+          placeholder="بحث (Search Active Board Meetings)"
+        />
+        <table id="boardMeetingsTable">
+          <thead>
+            <tr>
+              <th>رقم الاجتماع</th>
+              <th>تاريخ الاجتماع</th>
+              <th>اليوم</th>
+              <th>وقت الجلسه</th>
+              <th>مده الجلسه بالدقيقه</th>
+              <th>مكان انعقاد الاجتماع</th>
+              <th>مقرر الاجتماع</th>
+              <th>الموضوع</th>
+              <th>إضافة موضوع</th>
+              <th>إضافة بند تصويت</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (boardMeetings && boardMeetings.length > 0) { %> <%
+            boardMeetings.forEach(function(boardMeeting) { %>
+            <tr data-id="<%= boardMeeting._id %>">
+              <td><%= boardMeeting.sessionNumber %></td>
+              <td>
+                <%= boardMeeting.date ?
+                boardMeeting.date.toISOString().substring(0, 10) : '' %>
+              </td>
+              <td><%= boardMeeting.day %></td>
+              <td><%= boardMeeting.time %></td>
+              <td><%= boardMeeting.duration %></td>
+              <td><%= boardMeeting.location %></td>
+              <td><%= boardMeeting.secretary %></td>
+              <td><%= boardMeeting.topic %></td>
+              <td>
+                <button
+                  class="button add"
+                  onclick="showAddTopicForm('<%= boardMeeting._id %>')"
+                >
+                  إضافة موضوع
+                </button>
+              </td>
+              <td>
+                <button
+                  class="button add"
+                  onclick="showAddVotingItemForm('<%= boardMeeting._id %>')"
+                >
+                  إضافة بند تصويت
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="10">
+                <strong>بنود التصويت:</strong>
+                <% if (boardMeeting.votingItems &&
+                boardMeeting.votingItems.length > 0) { %>
+                <ul>
+                  <% boardMeeting.votingItems.forEach(function(item, index) { %>
+                  <li>
+                    <%= item.title %> - <%= item.description %>
+                    <button
+                      class="button"
+                      onclick="vote('<%= boardMeeting._id %>', <%= index %>, 'yes')"
+                    >
+                      نعم
+                    </button>
+                    <button
+                      class="button"
+                      onclick="vote('<%= boardMeeting._id %>', <%= index %>, 'no')"
+                    >
+                      لا
+                    </button>
+                    <span>
+                      التصويت الحالي: نعم (<%= item.votes ?
+                      item.votes.filter(function(v) { return v === 'yes';
+                      }).length : 0 %>), لا (<%= item.votes ?
+                      item.votes.filter(function(v) { return v === 'no';
+                      }).length : 0 %>)
+                    </span>
+                  </li>
+                  <% }) %>
+                </ul>
+                <% } else { %>
+                <em>لا توجد بنود تصويت مضافة بعد.</em>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %> <% } else { %>
+            <tr>
+              <td colspan="10">لا توجد اجتماعات نشطة حالياً</td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+
+        <!-- Add Topic Form Modal -->
+        <div id="addTopicModal">
+          <h3>إضافة موضوع للاجتماع</h3>
+          <form id="addTopicForm">
+            <input type="hidden" id="topicMeetingId" name="meetingId" />
+            <div class="form-group">
+              <label for="topicTitle">عنوان الموضوع</label>
+              <input type="text" id="topicTitle" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="topicDescription">وصف الموضوع</label>
+              <textarea
+                id="topicDescription"
+                name="description"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="button add">إضافة</button>
+            <button type="button" class="button" onclick="closeAddTopicForm()">
+              إلغاء
+            </button>
+          </form>
+        </div>
+
+        <!-- Add Voting Item Form Modal -->
+        <div id="addVotingItemModal">
+          <h3>إضافة بند تصويت للاجتماع</h3>
+          <form id="addVotingItemForm">
+            <input type="hidden" id="votingMeetingId" name="meetingId" />
+            <div class="form-group">
+              <label for="votingItemTitle">عنوان البند</label>
+              <input type="text" id="votingItemTitle" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="votingItemDescription">وصف البند</label>
+              <textarea
+                id="votingItemDescription"
+                name="description"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="button add">إضافة</button>
+            <button
+              type="button"
+              class="button"
+              onclick="closeAddVotingItemForm()"
+            >
+              إلغاء
+            </button>
+          </form>
+        </div>
+
+        <script>
+          // Search active board meetings
+          document
+            .getElementById("searchBoardMeetings")
+            .addEventListener("input", function () {
+              const filter = this.value.toLowerCase();
+              const rows = document.querySelectorAll(
+                "#boardMeetingsTable tbody tr"
+              );
+              rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                let match = false;
+                cells.forEach((cell) => {
+                  if (cell.textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                  }
+                });
+                row.style.display = match ? "" : "none";
+              });
+            });
+
+          // Show add topic form
+          function showAddTopicForm(meetingId) {
+            document.getElementById("topicMeetingId").value = meetingId;
+            document.getElementById("addTopicModal").style.display = "block";
+          }
+
+          // Close add topic form
+          function closeAddTopicForm() {
+            document.getElementById("addTopicForm").reset();
+            document.getElementById("addTopicModal").style.display = "none";
+          }
+
+          // Show add voting item form
+          function showAddVotingItemForm(meetingId) {
+            document.getElementById("votingMeetingId").value = meetingId;
+            document.getElementById("addVotingItemModal").style.display =
+              "block";
+          }
+
+          // Close add voting item form
+          function closeAddVotingItemForm() {
+            document.getElementById("addVotingItemForm").reset();
+            document.getElementById("addVotingItemModal").style.display =
+              "none";
+          }
+
+          // Handle add topic form submission
+          document
+            .getElementById("addTopicForm")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+              const meetingId = document.getElementById("topicMeetingId").value;
+              const title = document.getElementById("topicTitle").value;
+              const description =
+                document.getElementById("topicDescription").value;
+              try {
+                const response = await fetch(
+                  `/boardmeetings/${meetingId}/topics`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description }),
+                  }
+                );
+                if (response.ok) {
+                  alert("تم إضافة الموضوع بنجاح");
+                  closeAddTopicForm();
+                  location.reload();
+                } else {
+                  alert("فشل في إضافة الموضوع");
+                }
+              } catch (error) {
+                alert("خطأ في الاتصال بالخادم");
+              }
+            });
+
+          // Handle add voting item form submission
+          document
+            .getElementById("addVotingItemForm")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+              const meetingId =
+                document.getElementById("votingMeetingId").value;
+              const title = document.getElementById("votingItemTitle").value;
+              const description = document.getElementById(
+                "votingItemDescription"
+              ).value;
+              try {
+                const response = await fetch(
+                  `/boardmeetings/${meetingId}/voting-items`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description }),
+                  }
+                );
+                if (response.ok) {
+                  alert("تم إضافة بند التصويت بنجاح");
+                  closeAddVotingItemForm();
+                  location.reload();
+                } else {
+                  alert("فشل في إضافة بند التصويت");
+                }
+              } catch (error) {
+                alert("خطأ في الاتصال بالخادم");
+              }
+            });
+
+          // Handle voting
+          async function vote(meetingId, itemIndex, vote) {
+            try {
+              const response = await fetch(`/boardmeetings/${meetingId}/vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemIndex, vote }),
+              });
+              if (response.ok) {
+                alert("تم تسجيل التصويت بنجاح");
+                location.reload();
+              } else {
+                alert("فشل في تسجيل التصويت");
+              }
+            } catch (error) {
+              alert("خطأ في الاتصال بالخادم");
+            }
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('opinionPolls.title') || 'Opinion Polls' %></title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+
+    <!-- <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" /> -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f6fff8;
+        min-height: 100vh;
+      }
+      .container {
+        width: 100vw;
+        min-height: 100vh;
+        padding: 40px 0 0 0;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      .main-content {
+        flex-grow: 1;
+        padding: 0 20px 40px 20px;
+        box-sizing: border-box;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #218838;
+        text-align: center;
+        margin-bottom: 30px;
+        letter-spacing: 1px;
+      }
+      a.add-btn {
+        display: block;
+        width: 220px;
+        margin: 0 auto 25px auto;
+        padding: 12px 0;
+        background: linear-gradient(90deg, #43ea7f 0%, #218838 100%);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1.1em;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(33, 136, 56, 0.08);
+        transition: background 0.2s;
+      }
+      a.add-btn:hover {
+        background: linear-gradient(90deg, #218838 0%, #43ea7f 100%);
+      }
+      table {
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(33, 136, 56, 0.1);
+      }
+      th,
+      td {
+        padding: 18px 14px;
+        text-align: center;
+      }
+      th {
+        background: #218838;
+        color: #fff;
+        font-size: 1.05em;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) {
+        background: #e8f5e9;
+      }
+      tr:hover {
+        background: #d4edda;
+        transition: background 0.2s;
+      }
+      @media (max-width: 900px) {
+        table,
+        th,
+        td {
+          font-size: 0.95em;
+        }
+        .container {
+          padding: 20px 0 0 0;
+        }
+      }
+      @media (max-width: 600px) {
+        table,
+        th,
+        td {
+          font-size: 0.85em;
+          padding: 10px 4px;
+        }
+        .container {
+          padding: 10px 0 0 0;
+        }
+        a.add-btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: -20px">
+      <%- include('partials/sidebar') %>
+
+      <div class="main-content">
+        <h1><%= t('opinionPolls.header') || 'Opinion Polls List' %></h1>
+        <a href="/api/opinionPolls/create" class="add-btn">
+          <%= t('opinionPolls.addButton') || 'Add Opinion Poll' %>
+        </a>
+        <table>
+          <thead>
+            <tr>
+              <th><%= t('opinionPolls.questionLabel') || 'Question' %></th>
+              <th><%= t('opinionPolls.option1Label') || 'Option 1' %></th>
+              <th><%= t('opinionPolls.option2Label') || 'Option 2' %></th>
+              <th><%= t('opinionPolls.statusLabel') || 'Status' %></th>
+              <th><%= t('opinionPolls.createdAtLabel') || 'Created At' %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% opinionPolls.forEach(function(poll) { %>
+            <tr>
+              <td><%= poll.question %></td>
+              <td><%= poll.option1 %></td>
+              <td><%= poll.option2 %></td>
+              <td><%= poll.status %></td>
+              <td><%= poll.createdAt.toISOString().substring(0, 10) %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const toggleBtn = document.getElementById("toggle-btn");
+      const sidebar = document.getElementById("sidebar");
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+      });
+
+      // Dropdown toggle functionality for nested dropdowns
+      document.querySelectorAll(".dropdown-toggle").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          const expanded = button.getAttribute("aria-expanded") === "true";
+          button.setAttribute("aria-expanded", !expanded);
+          const menu = document.getElementById(
+            button.getAttribute("aria-controls")
+          );
+          if (menu) {
+            if (menu.hasAttribute("hidden")) {
+              menu.removeAttribute("hidden");
+            } else {
+              menu.setAttribute("hidden", "");
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

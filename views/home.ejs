@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('home.title') %></title>
+    <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" />
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+      }
+      .card:hover {
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      .card a {
+        text-decoration: none;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+      }
+      .icon {
+        font-size: 48px;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container">
+      <%- include('partials/sidebar') %>
+      <button id="toggle-btn" class="toggle-btn" aria-label="Toggle Sidebar">
+        &#9776;
+      </button>
+      <main class="main-content">
+        <h1><%= t('home.header') %></h1>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">🏢</div>
+            <a href="/api/workdestinations?lang=<%= lang %>"
+              ><%= t('home.workDestinations') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">🛡️</div>
+            <a href="/api/membershiptypes?lang=<%= lang %>"
+              ><%= t('home.membershipTypes') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">💼</div>
+            <a href="/api/memberjobs?lang=<%= lang %>"
+              ><%= t('home.memberJobs') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">🎓</div>
+            <a href="/api/membertitles?lang=<%= lang %>"
+              ><%= t('home.memberTitles') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">📍</div>
+            <a href="/api/meetingplaces?lang=<%= lang %>"
+              ><%= t('home.meetingPlaces') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">🏙️</div>
+            <a href="/api/cities?lang=<%= lang %>"><%= t('home.cities') %></a>
+          </div>
+          <div class="card">
+            <div class="icon">🏘️</div>
+            <a href="/api/neighborhoods?lang=<%= lang %>"
+              ><%= t('home.neighborhoods') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">⏸️</div>
+            <a href="/api/suspensionreasons?lang=<%= lang %>"
+              ><%= t('home.suspensionReasons') %></a
+            >
+          </div>
+          <div class="card">
+            <div class="icon">📋</div>
+            <a href="/api/allentities?lang=<%= lang %>"
+              ><%= t('home.allEntities') %></a
+            >
+          </div>
+        </div>
+      </main>
+    </div>
+    <script>
+      const toggleBtn = document.getElementById("toggle-btn");
+      const sidebar = document.getElementById("sidebar");
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+      });
+
+      // Dropdown toggle functionality for nested dropdowns
+      document.querySelectorAll(".dropdown-toggle").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          const expanded = button.getAttribute("aria-expanded") === "true";
+          button.setAttribute("aria-expanded", !expanded);
+          const menu = document.getElementById(
+            button.getAttribute("aria-controls")
+          );
+          if (menu) {
+            if (menu.hasAttribute("hidden")) {
+              menu.removeAttribute("hidden");
+            } else {
+              menu.setAttribute("hidden", "");
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

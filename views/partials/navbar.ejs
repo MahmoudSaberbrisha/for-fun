@@ -1,0 +1,293 @@
+<nav
+  style="
+    background: linear-gradient(135deg, #014138 70%, #026e5e 100%);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 8px 24px 0 rgba(1, 65, 56, 0.25), 0 1.5px 0 #fff inset;
+    /* border-radius: 18px; */
+  "
+>
+  <img
+    style="margin-left: 150px; width: 300px; height: auto"
+    src="https://abna.org.sa/asisst/web_assets/images/logo.png"
+  />
+
+  <!-- Language Icons -->
+  <div style="position: absolute; left: 30px; display: flex; gap: 10px">
+    <!-- Arabic Language Icon -->
+    <a
+      href="?lang=ar"
+      title="العربية"
+      style="
+        color: white;
+        text-decoration: none;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 2px 4px #0004);
+      "
+    >
+      🇸🇦
+    </a>
+    <!-- English Language Icon -->
+    <a
+      href="?lang=en"
+      title="English"
+      style="
+        color: white;
+        text-decoration: none;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 2px 4px #0004);
+      "
+    >
+      🇬🇧
+    </a>
+  </div>
+  <div
+    id="datetime"
+    style="
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #014138 70%, #026e5e 100%);
+      padding: 15px 30px;
+      margin-left: 1100px;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18), 0 1.5px 0 #fff3 inset;
+      text-align: center;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #fff2;
+    "
+  >
+    <!-- سيتم عرض الوقت والتاريخ هنا -->
+  </div>
+
+  <!-- Profile dropdown -->
+  <div style="position: absolute; right: 30px">
+    <div id="profileDropdown" style="position: relative; cursor: pointer">
+      <img
+        src="https://www.w3schools.com/howto/img_avatar.png"
+        alt="Profile"
+        style="
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 2px solid white;
+        "
+        onclick="toggleDropdown()"
+      />
+      <div
+        id="dropdownMenu"
+        style="
+          display: none;
+          position: absolute;
+          right: 0;
+          background-color: white;
+          min-width: 160px;
+          box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          z-index: 1000;
+          margin-top: 8px;
+        "
+      >
+        <a
+          href="/profile"
+          style="
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #ddd;
+          "
+          >الملف الشخصي</a
+        >
+        <a
+          href="/logout"
+          style="
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+          "
+          >تسجيل خروج</a
+        >
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function updateDateTime() {
+    const now = new Date();
+    const days = [
+      "الأحد",
+      "الاثنين",
+      "الثلاثاء",
+      "الأربعاء",
+      "الخميس",
+      "الجمعة",
+      "السبت",
+    ];
+    const months = [
+      "يناير",
+      "فبراير",
+      "مارس",
+      "أبريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "أغسطس",
+      "سبتمبر",
+      "أكتوبر",
+      "نوفمبر",
+      "ديسمبر",
+    ];
+    const dayName = days[now.getDay()];
+    const day = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const seconds = now.getSeconds().toString().padStart(2, "0");
+    const time = `${hours}:${minutes}:${seconds}`;
+    const date = `${day} ${month} ${year}`;
+
+    // التاريخ الهجري
+    const hijriFormatter = new Intl.DateTimeFormat("ar-SA-u-ca-islamic", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const hijriDate = hijriFormatter.format(
+      new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    );
+
+    document.getElementById("datetime").innerHTML = `
+      <div>
+        <div>${dayName}</div>
+        <div style="margin: 8px 0;">${date}</div>
+        <div style="font-size:2rem; text-shadow: 0 2px 8px #0005;">${time}</div>
+      </div>
+      <div style="
+        background: linear-gradient(120deg, #fff 80%, #e0f7f4 100%);
+        color: #014138;
+        border-radius: 10px;
+        padding: 10px 20px;
+        min-width: 120px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 1.5px 0 #01413822 inset;
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #01413822;
+      ">
+        <span style="font-size:1.2rem; text-shadow: 0 1px 4px #01413822;">${hijriDate}</span>
+        <span style="font-size:0.9rem;">هجري</span>
+      </div>
+    `;
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownMenu");
+    if (dropdown.style.display === "block") {
+      dropdown.style.display = "none";
+    } else {
+      dropdown.style.display = "block";
+    }
+  }
+
+  // Close the dropdown if the user clicks outside of it
+  window.onclick = function (event) {
+    if (!event.target.matches("#profileDropdown img")) {
+      const dropdown = document.getElementById("dropdownMenu");
+      if (dropdown && dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+      }
+    }
+  };
+</script>
+
+<script>
+  function updateDateTime() {
+    const now = new Date();
+    const days = [
+      "الأحد",
+      "الاثنين",
+      "الثلاثاء",
+      "الأربعاء",
+      "الخميس",
+      "الجمعة",
+      "السبت",
+    ];
+    const months = [
+      "يناير",
+      "فبراير",
+      "مارس",
+      "أبريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "أغسطس",
+      "سبتمبر",
+      "أكتوبر",
+      "نوفمبر",
+      "ديسمبر",
+    ];
+    const dayName = days[now.getDay()];
+    const day = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const seconds = now.getSeconds().toString().padStart(2, "0");
+    const time = `${hours}:${minutes}:${seconds}`;
+    const date = `${day} ${month} ${year}`;
+
+    // التاريخ الهجري
+    const hijriFormatter = new Intl.DateTimeFormat("ar-SA-u-ca-islamic", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const hijriDate = hijriFormatter.format(
+      new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    );
+
+    document.getElementById("datetime").innerHTML = `
+      <div>
+        <div>${dayName}</div>
+        <div style="margin: 8px 0;">${date}</div>
+        <div style="font-size:2rem; text-shadow: 0 2px 8px #0005;">${time}</div>
+      </div>
+      <div style="
+        background: linear-gradient(120deg, #fff 80%, #e0f7f4 100%);
+        color: #014138;
+        border-radius: 10px;
+        padding: 10px 20px;
+        min-width: 120px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 1.5px 0 #01413822 inset;
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #01413822;
+      ">
+        <span style="font-size:1.2rem; text-shadow: 0 1px 4px #01413822;">${hijriDate}</span>
+        <span style="font-size:0.9rem;">هجري</span>
+      </div>
+    `;
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+</script>

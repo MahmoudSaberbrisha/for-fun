@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('breakingnews.title') || 'Breaking News' %></title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+  </head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f6fff8;
+      min-height: 100vh;
+    }
+    .container {
+      /* width: 100vw; */
+      min-height: 100vh;
+      padding: -40px 0 0 0;
+      background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .main-content {
+      flex-grow: 1;
+      padding: 0 20px 40px 20px;
+      box-sizing: border-box;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #218838;
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+    }
+    a.add-btn {
+      display: block;
+      width: 220px;
+      margin: 0 auto 25px auto;
+      padding: 12px 0;
+      background: linear-gradient(90deg, #43ea7f 0%, #218838 100%);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1em;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(33, 136, 56, 0.08);
+      transition: background 0.2s;
+    }
+    a.add-btn:hover {
+      background: linear-gradient(90deg, #218838 0%, #43ea7f 100%);
+    }
+    table {
+      width: 100%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(33, 136, 56, 0.1);
+    }
+    th,
+    td {
+      padding: 18px 14px;
+      text-align: center;
+    }
+    th {
+      background: #218838;
+      color: #fff;
+      font-size: 1.05em;
+      letter-spacing: 0.5px;
+    }
+    tr:nth-child(even) {
+      background: #e8f5e9;
+    }
+    tr:hover {
+      background: #d4edda;
+      transition: background 0.2s;
+    }
+    @media (max-width: 900px) {
+      table,
+      th,
+      td {
+        font-size: 0.95em;
+      }
+      .container {
+        padding: 20px 0 0 0;
+      }
+    }
+    @media (max-width: 600px) {
+      table,
+      th,
+      td {
+        font-size: 0.85em;
+        padding: 10px 4px;
+      }
+      .container {
+        padding: 10px 0 0 0;
+      }
+      a.add-btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <body>
+    <%- include('partials/navbar') %>
+    <div
+      class="container"
+      style="
+        /* width: 100vw; */
+        min-height: 100vh;
+        padding-top: 40px;
+        margin-top: -20px;
+        background: linear-gradient(135deg, #e8f5e9 0%, #fff 100%);
+        box-sizing: border-box;
+        display: flex;
+        /* flex-direction: row-reverse; */
+        align-items: flex-start;
+        gap: 0;
+      "
+    >
+      <%- include('partials/sidebar') %>
+      <div
+        class="main-content"
+        style="
+          flex-grow: 1;
+          /* width: 100%; */
+          max-width: none;
+          /* padding: 40px 5vw 40px 5vw; */
+          margin: 0;
+        "
+      >
+        <h1
+          style="
+            color: #218838;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+          "
+        >
+          <%= t('breakingnews.header') || 'Breaking News' %>
+        </h1>
+
+        <form
+          action="/api/breakingnews"
+          method="POST"
+          style="
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(33, 136, 56, 0.07);
+            padding: 24px 20px;
+            margin-bottom: 32px;
+          "
+        >
+          <label for="content" style="color: #218838; font-weight: bold">
+            <%= t('breakingnews.contentLabel') || 'Content:' %>
+          </label>
+          <textarea
+            id="content"
+            name="content"
+            rows="4"
+            cols="50"
+            required
+            placeholder="<%= t('breakingnews.contentPlaceholder') || '' %>"
+            style="
+              width: 100%;
+              border: 1px solid #43ea7f;
+              border-radius: 8px;
+              margin: 12px 0 18px 0;
+              padding: 10px;
+              font-size: 1em;
+              background: #f6fff8;
+            "
+          ></textarea>
+          <button
+            type="submit"
+            style="
+              background: linear-gradient(90deg, #43ea7f 0%, #218838 100%);
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+              padding: 12px 32px;
+              font-weight: bold;
+              font-size: 1.1em;
+              cursor: pointer;
+              transition: background 0.2s;
+            "
+          >
+            <%= t('breakingnews.addButton') || 'Add Breaking News' %>
+          </button>
+        </form>
+
+        <h2 style="color: #218838; margin-bottom: 18px">
+          <%= t('breakingnews.allNewsHeader') || 'All Breaking News' %>
+        </h2>
+        <ul style="list-style: none; padding: 0; margin: 0 0 32px 0">
+          <% items.forEach(function(item) { %>
+          <li
+            style="
+              background: #e8f5e9;
+              margin-bottom: 14px;
+              border-radius: 8px;
+              padding: 14px 18px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              box-shadow: 0 1px 4px rgba(33, 136, 56, 0.06);
+            "
+          >
+            <span style="color: #218838; font-size: 1.05em"
+              ><%= item.content %></span
+            >
+            <form
+              action="/api/breakingnews/edit/<%= item._id %>"
+              method="GET"
+              style="display: inline"
+            >
+              <button
+                type="submit"
+                style="
+                  background: #218838;
+                  color: #fff;
+                  border: none;
+                  border-radius: 6px;
+                  padding: 7px 18px;
+                  font-weight: bold;
+                  cursor: pointer;
+                  margin-right: 8px;
+                "
+              >
+                <%= t('breakingnews.editButton') || 'Edit' %>
+              </button>
+            </form>
+          </li>
+          <% }) %>
+        </ul>
+
+        <% if (editItem) { %>
+        <h2 style="color: #218838; margin-bottom: 18px">
+          <%= t('breakingnews.editHeader') || 'Edit Breaking News' %>
+        </h2>
+        <form
+          action="/api/breakingnews/edit/<%= editItem._id %>"
+          method="POST"
+          style="
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(33, 136, 56, 0.07);
+            padding: 24px 20px;
+            margin-bottom: 32px;
+          "
+        >
+          <label for="contentEdit" style="color: #218838; font-weight: bold">
+            <%= t('breakingnews.contentLabel') || 'Content:' %>
+          </label>
+          <textarea
+            id="contentEdit"
+            name="content"
+            rows="4"
+            cols="50"
+            required
+            style="
+              width: 100%;
+              border: 1px solid #43ea7f;
+              border-radius: 8px;
+              margin: 12px 0 18px 0;
+              padding: 10px;
+              font-size: 1em;
+              background: #f6fff8;
+            "
+          >
+<%= editItem.content %></textarea
+          >
+          <button
+            type="submit"
+            style="
+              background: linear-gradient(90deg, #43ea7f 0%, #218838 100%);
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+              padding: 12px 32px;
+              font-weight: bold;
+              font-size: 1.1em;
+              cursor: pointer;
+              transition: background 0.2s;
+            "
+          >
+            <%= t('breakingnews.updateButton') || 'Update Breaking News' %>
+          </button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>اجتماعات مجلس الاداره (Board Meetings)</title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Cairo", Arial, sans-serif;
+        background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+        min-height: 100vh;
+        color: #222;
+      }
+      .container {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+      }
+      .scroll-container {
+        flex: 1;
+        width: 100%;
+        max-width: 100vw;
+        min-height: 100vh;
+        overflow: auto;
+        border: none;
+        padding: 40px 40px 40px 40px;
+        background: linear-gradient(120deg, #e8f5e9 60%, #ffffff 100%);
+        box-sizing: border-box;
+        box-shadow: 0 0 24px 0 rgba(76, 175, 80, 0.08);
+        border-radius: 0;
+        transition: box-shadow 0.3s;
+      }
+      h1,
+      h2 {
+        color: #388e3c;
+        text-shadow: 0 2px 8px #c8e6c9;
+        margin-bottom: 24px;
+        letter-spacing: 1px;
+      }
+      form {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px 0 rgba(76, 175, 80, 0.1);
+        padding: 32px 24px 24px 24px;
+        margin-bottom: 32px;
+        transition: box-shadow 0.3s;
+        border: 1px solid #c8e6c9;
+        max-width: 95%;
+        width: 100%;
+        animation: fadeIn 1s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #388e3c;
+        font-weight: 600;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #c8e6c9;
+        border-radius: 8px;
+        background: #f9fff9;
+        font-size: 1rem;
+        transition: border 0.2s, box-shadow 0.2s;
+        outline: none;
+      }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border: 1.5px solid #43a047;
+        box-shadow: 0 0 8px #a5d6a7;
+      }
+      .button {
+        padding: 10px 20px;
+        margin-right: 8px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        box-shadow: 0 2px 8px 0 rgba(76, 175, 80, 0.1);
+      }
+      .button:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 4px 16px 0 rgba(76, 175, 80, 0.15);
+      }
+      .button.edit {
+        background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%);
+        color: white;
+      }
+      .button.delete {
+        background: linear-gradient(90deg, #e53935 60%, #ff7043 100%);
+        color: white;
+      }
+      .button.print {
+        background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
+        color: white;
+      }
+      .button[type="submit"] {
+        background: linear-gradient(90deg, #388e3c 60%, #81c784 100%);
+        color: #fff;
+        margin-top: 10px;
+      }
+      .search-input {
+        margin-bottom: 18px;
+        padding: 10px 14px;
+        width: 350px;
+        border-radius: 8px;
+        border: 1px solid #c8e6c9;
+        background: #f9fff9;
+        font-size: 1rem;
+        transition: border 0.2s, box-shadow 0.2s;
+      }
+      .search-input:focus {
+        border: 1.5px solid #43a047;
+        box-shadow: 0 0 8px #a5d6a7;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 30px;
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px 0 rgba(76, 175, 80, 0.1);
+        animation: fadeIn 1s;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #e0f2f1;
+        padding: 12px 10px;
+        text-align: left;
+        font-size: 1rem;
+        transition: background 0.2s;
+      }
+      th {
+        background: linear-gradient(90deg, #e8f5e9 80%, #ffffff 100%);
+        color: #388e3c;
+        font-weight: 700;
+        border-bottom: 2px solid #a5d6a7;
+      }
+      tr:hover td {
+        background: #f1f8e9;
+      }
+      td.remaining-time {
+        font-weight: bold;
+        color: #388e3c;
+        letter-spacing: 1px;
+      }
+      @media (max-width: 900px) {
+        .scroll-container {
+          padding: 16px 4vw;
+        }
+        form {
+          padding: 18px 8px;
+        }
+        .search-input {
+          width: 100%;
+        }
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container" style="margin-top: 20px">
+      <%- include('partials/sidebar') %>
+      <div class="scroll-container">
+        <h1>فتح اجتماع مجلس الاداره (Open Board Meeting)</h1>
+        <form id="boardMeetingForm">
+          <div style="display: flex; flex-wrap: wrap; gap: 18px">
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="sessionNumber">رقم الاجتماع (Session Number)</label>
+              <input
+                type="text"
+                id="sessionNumber"
+                name="sessionNumber"
+                value="<%= nextSessionNumber %>"
+                readonly
+                required
+              />
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="date">تاريخ الاجتماع (Date)</label>
+              <input type="date" id="date" name="date" required />
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="day">اليوم (Day)</label>
+              <select id="day" name="day" required>
+                <option value="" disabled selected>اختر اليوم</option>
+                <option value="الأحد">الأحد</option>
+                <option value="الإثنين">الإثنين</option>
+                <option value="الثلاثاء">الثلاثاء</option>
+                <option value="الأربعاء">الأربعاء</option>
+                <option value="الخميس">الخميس</option>
+                <option value="الجمعة">الجمعة</option>
+                <option value="السبت">السبت</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="time">وقت الجلسه (Time)</label>
+              <input type="time" id="time" name="time" required />
+            </div>
+
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="duration"
+                >مده الجلسه بالدقيقه (Duration in minutes)</label
+              >
+              <input type="number" id="duration" name="duration" required />
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="location">مكان انعقاد الاجتماع (Location)</label>
+              <select id="location" name="location" required>
+                <option value="" disabled selected>اختر المكان</option>
+                <% if (meetingPlaces && meetingPlaces.length > 0) { %> <%
+                meetingPlaces.forEach(function(place) { %>
+                <option value="<%= place.name %>"><%= place.name %></option>
+                <% }) %> <% } %>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="secretary">مقرر الاجتماع (Secretary)</label>
+              <select id="secretary" name="secretary" required>
+                <option value="" disabled selected>اختر المقرر</option>
+                <% if (members && members.length > 0) { %> <%
+                members.forEach(function(member) { %>
+                <option value="<%= member.name %>"><%= member.name %></option>
+                <% }) %> <% } %>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1 1 22%">
+              <label for="topic">الموضوع (Topic)</label>
+              <textarea id="topic" name="topic" required></textarea>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="button"
+            style="width: 100%; margin-top: 18px"
+          >
+            فتح اجتماع مجلس الاداره (Open Board Meeting)
+          </button>
+        </form>
+
+        <h2>الاجتماعات التي تمت بالفعل (Board Meetings Held)</h2>
+        <input
+          type="text"
+          id="searchBoardMeetings"
+          class="search-input"
+          placeholder="بحث (Search Board Meetings)"
+        />
+        <table id="boardMeetingsTable">
+          <thead>
+            <tr>
+              <th>رقم الاجتماع</th>
+              <th>تاريخ الاجتماع</th>
+              <th>اليوم</th>
+              <th>وقت الجلسه</th>
+              <th>مده الجلسه بالدقيقه</th>
+              <th>مكان انعقاد الاجتماع</th>
+              <th>مقرر الاجتماع</th>
+              <th>الموضوع</th>
+              <th>تعديل</th>
+              <th>حذف</th>
+              <th>الوقت المتبقي</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (boardMeetings && boardMeetings.length > 0) { %> <%
+            boardMeetings.forEach(function(boardMeeting) { %>
+            <tr data-id="<%= boardMeeting._id %>">
+              <td><%= boardMeeting.sessionNumber %></td>
+              <td>
+                <%= boardMeeting.date ?
+                boardMeeting.date.toISOString().substring(0, 10) : '' %>
+              </td>
+              <td><%= boardMeeting.day %></td>
+              <td><%= boardMeeting.time %></td>
+              <td><%= boardMeeting.duration %></td>
+              <td><%= boardMeeting.location %></td>
+              <td><%= boardMeeting.secretary %></td>
+              <td><%= boardMeeting.topic %></td>
+              <td>
+                <button
+                  class="button edit"
+                  onclick="editBoardMeeting('<%= boardMeeting._id %>')"
+                >
+                  تعديل
+                </button>
+              </td>
+              <td>
+                <button
+                  class="button delete"
+                  onclick="deleteBoardMeeting('<%= boardMeeting._id %>')"
+                >
+                  حذف
+                </button>
+              </td>
+              <td
+                class="remaining-time"
+                data-time="<%= boardMeeting.time %>"
+                data-duration="<%= boardMeeting.duration %>"
+              >
+                حساب الوقت...
+              </td>
+            </tr>
+            <% }) %> <% } else { %>
+            <tr>
+              <td colspan="11">لا توجد اجتماعات حالياً</td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+
+        <script>
+          // Handle board meeting form submission
+          document
+            .getElementById("boardMeetingForm")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+              const formData = {
+                sessionNumber: this.sessionNumber.value,
+                date: this.date.value,
+                day: this.day.value,
+                time: this.time.value,
+                duration: parseInt(this.duration.value),
+                location: this.location.value,
+                secretary: this.secretary.value,
+                topic: this.topic.value,
+                status: "Open",
+              };
+              try {
+                const response = await fetch("/api/boardmeetings", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(formData),
+                });
+                if (response.ok) {
+                  alert("تم فتح اجتماع مجلس الاداره بنجاح");
+                  location.reload();
+                } else {
+                  alert("حدث خطأ أثناء فتح اجتماع مجلس الاداره");
+                }
+              } catch (error) {
+                alert("خطأ في الاتصال بالخادم");
+              }
+            });
+
+          // Calculate and update remaining time for each meeting
+          function updateRemainingTime() {
+            const now = new Date();
+            document.querySelectorAll(".remaining-time").forEach((td) => {
+              const timeStr = td.getAttribute("data-time");
+              const duration = parseInt(td.getAttribute("data-duration"));
+              if (!timeStr || isNaN(duration)) {
+                td.textContent = "غير متوفر";
+                return;
+              }
+              // Parse time string (HH:mm)
+              const [hours, minutes] = timeStr.split(":").map(Number);
+              if (isNaN(hours) || isNaN(minutes)) {
+                td.textContent = "غير متوفر";
+                return;
+              }
+              // Calculate end time
+              const endTime = new Date(now);
+              endTime.setHours(hours);
+              endTime.setMinutes(minutes + duration);
+              endTime.setSeconds(0);
+              endTime.setMilliseconds(0);
+
+              const diffMs = endTime - now;
+              if (diffMs <= 0) {
+                td.textContent = "انتهى الاجتماع";
+              } else {
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHrs = Math.floor(diffMins / 60);
+                const mins = diffMins % 60;
+                td.textContent =
+                  diffHrs > 0
+                    ? `${diffHrs} ساعة و ${mins} دقيقة متبقية`
+                    : `${mins} دقيقة متبقية`;
+              }
+            });
+          }
+
+          // Update remaining time every minute
+          updateRemainingTime();
+          setInterval(updateRemainingTime, 60000);
+
+          // Search filter
+          document
+            .getElementById("searchBoardMeetings")
+            .addEventListener("input", function () {
+              const value = this.value.trim().toLowerCase();
+              document
+                .querySelectorAll("#boardMeetingsTable tbody tr")
+                .forEach(function (row) {
+                  if (
+                    row.textContent.toLowerCase().indexOf(value) > -1 ||
+                    row.querySelectorAll("td").length === 1
+                  ) {
+                    row.style.display = "";
+                  } else {
+                    row.style.display = "none";
+                  }
+                });
+            });
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

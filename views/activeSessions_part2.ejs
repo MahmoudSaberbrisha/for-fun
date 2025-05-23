@@ -1,0 +1,81 @@
+<table id="activeSessionsTable">
+  <thead>
+    <tr>
+      <th>رقم الجلسه</th>
+      <th>تاريخ الجلسه</th>
+      <th>اليوم</th>
+      <th>وقت الجلسه</th>
+      <th>مده الجلسه بالدقيقه</th>
+      <th>مكان انعقاد الجلسه</th>
+      <th>مقرر الجلسه</th>
+      <th>الموضوع</th>
+      <th>إضافة موضوع</th>
+      <th>إضافة بند تصويت</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (sessions && sessions.length > 0) { %> <%
+    sessions.forEach(function(session) { %>
+    <tr data-id="<%= session._id %>">
+      <td><%= session.sessionNumber %></td>
+      <td>
+        <%= session.date ? session.date.toISOString().substring(0, 10) : '' %>
+      </td>
+      <td><%= session.day %></td>
+      <td><%= session.time %></td>
+      <td><%= session.duration %></td>
+      <td><%= session.location %></td>
+      <td><%= session.secretary %></td>
+      <td><%= session.topic %></td>
+      <td>
+        <button
+          class="button add"
+          onclick="showAddTopicForm('<%= session._id %>')"
+        >
+          إضافة موضوع
+        </button>
+      </td>
+      <td>
+        <button
+          class="button add"
+          onclick="showAddVotingItemForm('<%= session._id %>')"
+        >
+          إضافة بند تصويت
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="10">
+        <strong>بنود التصويت:</strong>
+        <% if (session.votingItems && session.votingItems.length > 0) { %>
+        <ul class="voting-items">
+          <% session.votingItems.forEach(function(item, index) { %>
+          <li>
+            <%= item.title %> - <%= item.description %>
+            <button onclick="vote('<%= session._id %>', <%= index %>, 'yes')">
+              نعم
+            </button>
+            <button onclick="vote('<%= session._id %>', <%= index %>, 'no')">
+              لا
+            </button>
+            <span
+              >التصويت الحالي: نعم (<%= item.votes ?
+              item.votes.filter(function(v) { return v === 'yes'; }).length : 0
+              %>), لا (<%= item.votes ? item.votes.filter(function(v) { return v
+              === 'no'; }).length : 0 %>)</span
+            >
+          </li>
+          <% }) %>
+        </ul>
+        <% } else { %>
+        <em>لا توجد بنود تصويت مضافة بعد.</em>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %> <% } else { %>
+    <tr>
+      <td colspan="10">لا توجد جلسات نشطة حالياً</td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>

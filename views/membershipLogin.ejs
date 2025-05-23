@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>طلب عضوية / تسجيل دخول</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        direction: rtl;
+        margin: 30px;
+        background: linear-gradient(135deg, #025f51 30%, #014138 100%);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        color: #222;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .container {
+        max-width: 1800px;
+        width: 100%;
+        background-color: linear-gradient(135deg, #025f51 30%, #014138 100%);
+        padding: 40px 50px 60px 50px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12),
+          0 15px 40px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        perspective: 1000px;
+        transform-style: preserve-3d;
+        cursor: default;
+      }
+      /* Disabled container hover transform to prevent shaking */
+      .container:hover {
+        /* transform: translateY(-10px) rotateX(3deg) rotateY(-3deg); */
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2),
+          0 25px 80px rgba(0, 0, 0, 0.1);
+      }
+      .button-group {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 30px;
+        gap: 15px;
+        user-select: none;
+      }
+      .button-group button {
+        background: linear-gradient(145deg, #4f46e5, #6366f1);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        margin-left: 0;
+        cursor: pointer;
+        border-radius: 12px;
+        font-size: 22px;
+        font-weight: 600;
+        box-shadow: 5px 5px 10px #3b3bd1, -5px -5px 10px #7b7cf9;
+        transition: background 0.3s ease, transform 0.3s ease;
+        will-change: transform;
+        flex-shrink: 0; /* prevent shrinking */
+      }
+      .button-group button:hover {
+        background: linear-gradient(145deg, #6366f1, #818cf8);
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 8px 8px 15px #3b3bd1, -8px -8px 15px #7b7cf9;
+      }
+      .button-group button.active {
+        background: linear-gradient(145deg, #312e81, #4338ca);
+        box-shadow: inset 5px 5px 10px #2a2873, inset -5px -5px 10px #574fcc;
+        cursor: default;
+        transform: none;
+      }
+      form {
+        width: 100%;
+      }
+      .form-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 25px;
+      }
+      .form-group {
+        flex: 1 1 18%;
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        /* font-weight: 700; */
+        font-size: 18px;
+        margin-bottom: 12px;
+        color: #ffffff;
+        user-select: none;
+        /* text-shadow: 1px 1px 1px #ffffff; */
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="date"],
+      select,
+      input[type="file"],
+      input[type="password"] {
+        width: 100%;
+        padding: 12px 15px;
+        box-sizing: border-box;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 500;
+        color: #222;
+        background: #f9f9ff;
+        box-shadow: inset 5px 5px 10px #d0d0e9, inset -5px -5px 10px #ffffff;
+        transition: border-color 0.4s ease, box-shadow 0.4s ease,
+          background-color 0.4s ease;
+        font-family: inherit;
+      }
+      input[type="text"]::placeholder,
+      input[type="email"]::placeholder {
+        color: #9999b0;
+        font-style: italic;
+      }
+      input[type="text"]:focus,
+      input[type="email"]:focus,
+      input[type="date"]:focus,
+      select:focus,
+      input[type="file"]:focus,
+      input[type="password"]:focus {
+        border-color: #6b7cff;
+        background: #f0f3ff;
+        box-shadow: 0 0 10px 3px rgba(107, 124, 255, 0.5);
+        outline: none;
+      }
+      .checkbox-group {
+        margin-top: 20px;
+        font-size: 18px;
+        user-select: none;
+      }
+      .checkbox-group label {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        color: #ffffff;
+        /* text-shadow: 0 1px 1px #fff; */
+        cursor: pointer;
+      }
+      .checkbox-group input[type="checkbox"] {
+        margin-left: 15px;
+        transform: scale(1.5);
+        cursor: pointer;
+        accent-color: #6366f1;
+        transition: box-shadow 0.3s ease;
+        /* box-shadow: 2px 2px 8px rgba(99, 102, 241, 0.5); */
+        border-radius: 5px;
+      }
+      .checkbox-group input[type="checkbox"]:focus {
+        box-shadow: 0 0 10px 3px rgba(99, 102, 241, 0.7);
+        outline: none;
+      }
+      .pledge-text {
+        margin-top: 25px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #55557a;
+        font-style: italic;
+        user-select: text;
+        border-left: 4px solid #6366f1;
+        padding-left: 15px;
+        /* text-shadow: 0 0 1px #eee; */
+      }
+      .submit-btn {
+        margin-top: 40px;
+        background: linear-gradient(145deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        font-size: 24px;
+        font-weight: 700;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 5px 5px 15px #15803d, -5px -5px 15px #34d399;
+        transition: background 0.4s ease, transform 0.3s ease,
+          box-shadow 0.3s ease;
+        user-select: none;
+        width: 100%;
+      }
+      .submit-btn:hover {
+        background: linear-gradient(145deg, #16a34a, #22c55e);
+        transform: scale(1.12);
+        box-shadow: 8px 8px 18px #15803d, -8px -8px 18px #34d399;
+      }
+      /* Responsive adjustments */
+      @media (max-width: 992px) {
+        .form-row {
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+        .form-group {
+          flex: 1 1 45%;
+        }
+      }
+      @media (max-width: 576px) {
+        .container {
+          padding: 30px 25px 40px 25px;
+          border-radius: 15px;
+        }
+        .form-group {
+          flex: 1 1 100%;
+        }
+        .button-group {
+          flex-direction: column;
+          gap: 15px;
+        }
+        .button-group button {
+          font-size: 20px;
+          padding: 14px 20px;
+          border-radius: 12px;
+        }
+        .submit-btn {
+          font-size: 22px;
+          padding: 16px 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      style="height: 1000px"
+      aria-label="نموذج طلب عضوية وتسجيل دخول"
+    >
+      <div
+        class="button-group"
+        role="tablist"
+        aria-label="اختيار بين طلب عضوية أو تسجيل دخول"
+      >
+        <% if (typeof message !== 'undefined') { %>
+        <p style="color: green; font-weight: bold" role="alert">
+          <%= message %>
+        </p>
+        <% } %> <% if (typeof error !== 'undefined') { %>
+        <p style="color: red; font-weight: bold" role="alert"><%= error %></p>
+        <% } %>
+        <button
+          id="membershipBtn"
+          class="active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="membershipForm"
+          tabindex="0"
+        >
+          طلب عضوية
+        </button>
+        <button
+          id="loginBtn"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="loginForm"
+          tabindex="-1"
+        >
+          تسجيل دخول
+        </button>
+      </div>
+
+      <form
+        id="membershipForm"
+        action="/api/membership-requests"
+        method="POST"
+        enctype="multipart/form-data"
+        novalidate
+        role="tabpanel"
+        aria-labelledby="membershipBtn"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">الاسم</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              aria-required="true"
+              aria-describedby="nameHelp"
+            />
+          </div>
+          <div class="form-group">
+            <label for="nationalIdNumber">السجل المدني</label>
+            <input
+              type="text"
+              id="nationalIdNumber"
+              name="nationalIdNumber"
+              required
+              pattern="\\d+"
+              title="يجب أن يكون رقم السجل المدني أرقام فقط"
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="gender">الجنس</label>
+            <select id="gender" name="gender" required aria-required="true">
+              <option value="">اختر الجنس</option>
+              <option value="ذكر">ذكر</option>
+              <option value="انثى">انثى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="birthDate">تاريخ الميلاد</label>
+            <input
+              type="date"
+              id="birthDate"
+              name="birthDate"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="city">المدينة</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              required
+              aria-required="true"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phoneNumber">رقم الجوال</label>
+            <input
+              type="text"
+              id="phoneNumber"
+              name="phoneNumber"
+              required
+              pattern="^\\+966\\d{9}$"
+              title="يجب أن يبدأ رقم الجوال بـ +966 ويتبعه 9 أرقام"
+              placeholder="+966xxxxxxxxx"
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="email">البريد الالكتروني</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="education">المؤهل العالي</label>
+            <select
+              id="education"
+              name="education"
+              required
+              aria-required="true"
+            >
+              <option value="">اختر المؤهل العالي</option>
+              <option value="بكالوريوس">بكالوريوس</option>
+              <option value="ماجستير">ماجستير</option>
+              <option value="دكتوراه">دكتوراه</option>
+              <option value="دبلوم عالي">دبلوم عالي</option>
+              <option value="غير ذلك">غير ذلك</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="profession">المهنة</label>
+            <input
+              type="text"
+              id="profession"
+              name="profession"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="cv">السيرة الذاتية</label>
+            <input
+              type="file"
+              id="cv"
+              name="cv"
+              accept=".pdf,.doc,.docx"
+              aria-describedby="cvHelp"
+            />
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <label for="isEmployee">
+            <input type="checkbox" id="isEmployee" name="isEmployee" />
+            هل أنت موظف على الكيان؟
+          </label>
+        </div>
+
+        <div class="checkbox-group">
+          <label for="isSupplier">
+            <input type="checkbox" id="isSupplier" name="isSupplier" />
+            هل أنت مورد أو على علاقة تعاقدية بأي شكل مع الكيان؟
+          </label>
+        </div>
+
+        <div class="checkbox-group pledge-text">
+          <label for="pledge">
+            <input
+              type="checkbox"
+              id="pledge"
+              name="pledge"
+              required
+              aria-required="true"
+            />
+            أتعهد أنا بصفتي اسم مقدم الطلب بأنني قد أتممت ما يلزم من شروط
+            استحقاقات حسب ما نصت عليه اللائحة الأساسية للجمعية حيال شروط
+            الانضمام لعضوية الجمعية العمومية وأتعهد بدفع الرسوم السنوية لعضوية
+            الجمعية وعل ذلك أقر
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn" aria-label="إرسال طلب العضوية">
+          إرسال الطلب
+        </button>
+      </form>
+
+      <form
+        id="loginForm"
+        action="/api/members/login"
+        method="POST"
+        style="display: none"
+        novalidate
+        role="tabpanel"
+        aria-labelledby="loginBtn"
+      >
+        <% if (typeof error !== 'undefined') { %>
+        <p style="color: red; font-weight: bold" role="alert"><%= error %></p>
+        <% } %>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="membershipNumber">رقم العضوية</label>
+            <input
+              type="text"
+              id="membershipNumber"
+              name="membershipNumber"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="phoneNumberLogin">رقم الجوال</label>
+            <input
+              type="text"
+              id="phoneNumberLogin"
+              name="phoneNumber"
+              required
+              pattern="^\\+966\\d{9}$"
+              title="يجب أن يبدأ رقم الجوال بـ +966 ويتبعه 9 أرقام"
+              placeholder="+966xxxxxxxxx"
+              aria-required="true"
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" aria-label="تسجيل الدخول">
+          تسجيل دخول
+        </button>
+      </form>
+    </div>
+
+    <script>
+      const membershipBtn = document.getElementById("membershipBtn");
+      const loginBtn = document.getElementById("loginBtn");
+      const membershipForm = document.getElementById("membershipForm");
+      const loginForm = document.getElementById("loginForm");
+
+      loginBtn.addEventListener("click", () => {
+        membershipBtn.classList.remove("active");
+        loginBtn.classList.add("active");
+        membershipBtn.setAttribute("aria-selected", "false");
+        loginBtn.setAttribute("aria-selected", "true");
+        membershipBtn.setAttribute("tabindex", "-1");
+        loginBtn.setAttribute("tabindex", "0");
+
+        membershipForm.style.display = "none";
+        membershipForm.setAttribute("tabindex", "-1");
+        loginForm.style.display = "block";
+        loginForm.setAttribute("tabindex", "0");
+      });
+
+      membershipBtn.addEventListener("click", () => {
+        membershipBtn.classList.add("active");
+        loginBtn.classList.remove("active");
+        membershipBtn.setAttribute("aria-selected", "true");
+        loginBtn.setAttribute("aria-selected", "false");
+        membershipBtn.setAttribute("tabindex", "0");
+        loginBtn.setAttribute("tabindex", "-1");
+
+        membershipForm.style.display = "block";
+        membershipForm.setAttribute("tabindex", "0");
+        loginForm.style.display = "none";
+        loginForm.setAttribute("tabindex", "-1");
+      });
+    </script>
+    <script>
+      document
+        .getElementById("membershipForm")
+        .addEventListener("submit", function (e) {
+          console.log("Membership form submitted");
+        });
+    </script>
+  </body>
+</html>

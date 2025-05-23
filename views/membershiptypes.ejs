@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('membershipTypes.title') || 'Membership Types' %></title>
+    <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" />
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f6fff8;
+        color: #222;
+      }
+      .main-layout {
+        display: flex;
+        flex-direction: row-reverse;
+        min-height: 100vh;
+        width: 100vw;
+        background: linear-gradient(135deg, #e9ffe7 0%, #ffffff 100%);
+      }
+      .sidebar-area {
+        min-width: 220px;
+        background: #fff;
+        box-shadow: 2px 0 10px #e0ffe0;
+        z-index: 2;
+      }
+      .content-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 0 0 0;
+        width: 100%;
+      }
+      h1 {
+        color: #219150;
+        margin-bottom: 30px;
+        letter-spacing: 1px;
+        font-size: 2.2rem;
+        text-shadow: 0 2px 8px #e0ffe0;
+        align-self: flex-start;
+        padding-left: 40px;
+      }
+      .actions-row {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 32px;
+        width: 100%;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        padding-left: 40px;
+      }
+      form {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px #b6eac7a0;
+        padding: 24px 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        min-width: 320px;
+      }
+      .table-area {
+        flex: 1;
+        width: 100%;
+        padding: 0 40px 40px 40px;
+        box-sizing: border-box;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px #b6eac7a0;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 16px 18px;
+        text-align: left;
+      }
+      th {
+        background: #219150;
+        color: #fff;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+      }
+      tr:nth-child(even) {
+        background: #f6fff8;
+      }
+      tr:hover td {
+        background: #e9ffe7;
+      }
+      td a {
+        color: #219150;
+        font-weight: 500;
+        text-decoration: underline;
+        margin-right: 10px;
+        transition: color 0.2s;
+      }
+      td a:hover {
+        color: #43b97f;
+      }
+      td form {
+        display: inline;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        background: none;
+      }
+      td form button {
+        background: #e74c3c;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin: 0 0 0 8px;
+      }
+      td form button:hover {
+        background: #c0392b;
+      }
+      @media (max-width: 1100px) {
+        .main-layout {
+          flex-direction: column;
+        }
+        .sidebar-area {
+          min-width: 100vw;
+          box-shadow: none;
+        }
+        .content-area {
+          padding: 20px 0 0 0;
+        }
+        .actions-row {
+          flex-direction: column;
+          gap: 18px;
+          padding-left: 0;
+        }
+        .table-area {
+          padding: 0 0 40px 0;
+        }
+      }
+      @media (max-width: 700px) {
+        .content-area {
+          padding: 10px 0 0 0;
+        }
+        .actions-row {
+          padding-left: 0;
+        }
+        form {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+          min-width: 0;
+        }
+        table {
+          font-size: 0.95rem;
+        }
+        th,
+        td {
+          padding: 10px 6px;
+        }
+        .table-area {
+          padding: 0 0 20px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="main-layout" style="padding-top: 20px">
+      <div class="sidebar-area"><%- include('partials/sidebar') %></div>
+      <div class="content-area">
+        <h1><%= t('membershipTypes.header') || 'Membership Types' %></h1>
+        <div class="actions-row">
+          <form
+            action="<%= editItem ? '/api/membershiptypes/edit/' + editItem._id : '/api/membershiptypes' %>"
+            method="POST"
+          >
+            <input
+              type="text"
+              name="name"
+              placeholder="<%= t('membershipTypes.namePlaceholder') || 'Enter membership type name' %>"
+              value="<%= editItem ? editItem.name : '' %>"
+              required
+            />
+            <button type="submit">
+              <%= editItem ? (t('membershipTypes.updateButton') || 'Update') :
+              (t('membershipTypes.saveButton') || 'Save') %>
+            </button>
+            <% if (editItem) { %>
+            <a href="/api/membershiptypes"
+              ><%= t('membershipTypes.cancelLink') || 'Cancel' %></a
+            >
+            <% } %>
+          </form>
+        </div>
+        <div class="table-area">
+          <table>
+            <thead>
+              <tr>
+                <th><%= t('membershipTypes.table.name') || 'Name' %></th>
+                <th><%= t('membershipTypes.table.actions') || 'Actions' %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach(item => { %>
+              <tr>
+                <td><%= item.name %></td>
+                <td>
+                  <a href="/api/membershiptypes/edit/<%= item._id %>"
+                    ><%= t('membershipTypes.table.edit') || 'Edit' %></a
+                  >
+                  <form
+                    action="/api/membershiptypes/delete/<%= item._id %>"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button
+                      type="submit"
+                      onclick="return confirm('<%= t('membershipTypes.table.deleteConfirm') || 'Are you sure you want to delete this item?' %>');"
+                    >
+                      <%= t('membershipTypes.table.delete') || 'Delete' %>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

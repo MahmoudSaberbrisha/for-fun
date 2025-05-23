@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('allentities.title') %></title>
+    <link rel="stylesheet" href="/frontend/styles/neighborhoods.css" />
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <link rel="stylesheet" href="/frontend/styles/custom-sidebar.css" />
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 6px;
+      }
+      input[type="text"],
+      textarea {
+        width: 250px;
+      }
+      section {
+        margin-bottom: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+
+    <h1><%= t('allentities.header') %></h1>
+
+    <section id="workdestinations">
+      <h2><%= t('allentities.workDestinations.sectionTitle') %></h2>
+      <form action="/api/workdestinations" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.workDestinations.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <textarea
+          name="description"
+          placeholder="<%= t('allentities.workDestinations.descriptionPlaceholder') %>"
+        ></textarea>
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.workDestinations.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.workDestinations.table.name') %></th>
+            <th><%= t('allentities.workDestinations.table.description') %></th>
+            <th><%= t('allentities.workDestinations.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% workDestinations.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td><%= item.description %></td>
+            <td>
+              <a href="/api/workdestinations/edit/<%= item._id %>"
+                ><%= t('allentities.workDestinations.table.edit') %></a
+              >
+              <form
+                action="/api/workdestinations/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.workDestinations.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.workDestinations.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="membershiptypes">
+      <h2><%= t('allentities.membershipTypes.sectionTitle') %></h2>
+      <form action="/api/membershiptypes" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.membershipTypes.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.membershipTypes.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.membershipTypes.table.name') %></th>
+            <th><%= t('allentities.membershipTypes.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% membershipTypes.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td>
+              <form
+                action="/api/membershiptypes/edit/<%= item._id %>"
+                method="GET"
+                style="display: inline"
+              >
+                <button type="submit">
+                  <%= t('allentities.membershipTypes.table.edit') %>
+                </button>
+              </form>
+              <form
+                action="/api/membershiptypes/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.membershipTypes.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.membershipTypes.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="memberjobs">
+      <h2><%= t('allentities.memberJobs.sectionTitle') %></h2>
+      <form action="/api/memberjobs" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.memberJobs.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.memberJobs.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.memberJobs.table.name') %></th>
+            <th><%= t('allentities.memberJobs.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% memberJobs.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td>
+              <a href="/api/memberjobs/edit/<%= item._id %>">
+                <%= t('allentities.memberJobs.table.edit') %>
+              </a>
+              <form
+                action="/api/memberjobs/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.memberJobs.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.memberJobs.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="membertitles">
+      <h2><%= t('allentities.memberTitles.sectionTitle') %></h2>
+      <form action="/api/membertitles" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.memberTitles.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.memberTitles.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.memberTitles.table.name') %></th>
+            <th><%= t('allentities.memberTitles.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% memberTitles.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td>
+              <a href="/api/membertitles/edit/<%= item._id %>">
+                <%= t('allentities.memberTitles.table.edit') %>
+              </a>
+              <form
+                action="/api/membertitles/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.memberTitles.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.memberTitles.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="meetingplaces">
+      <h2><%= t('allentities.meetingPlaces.sectionTitle') %></h2>
+      <form action="/api/meetingplaces" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.meetingPlaces.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.meetingPlaces.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.meetingPlaces.table.name') %></th>
+            <th><%= t('allentities.meetingPlaces.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% meetingPlaces.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td>
+              <a href="/api/meetingplaces/edit/<%= item._id %>">
+                <%= t('allentities.meetingPlaces.table.edit') %>
+              </a>
+              <form
+                action="/api/meetingplaces/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.meetingPlaces.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.meetingPlaces.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="cities">
+      <h2><%= t('allentities.cities.sectionTitle') %></h2>
+      <form action="/api/cities" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.cities.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <input
+          type="number"
+          name="order"
+          placeholder="<%= t('allentities.cities.orderPlaceholder') %>"
+        />
+        <br /><br />
+        <button type="submit"><%= t('allentities.cities.addButton') %></button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.cities.table.name') %></th>
+            <th><%= t('allentities.cities.table.order') %></th>
+            <th><%= t('allentities.cities.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cities.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td><%= item.order !== undefined ? item.order : '' %></td>
+            <td>
+              <a href="/api/cities/edit/<%= item._id %>">
+                <%= t('allentities.cities.table.edit') %>
+              </a>
+              <form
+                action="/api/cities/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  onclick="return confirm('<%= t('allentities.cities.table.deleteConfirm') %>');"
+                >
+                  <%= t('allentities.cities.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="neighborhoods">
+      <h2><%= t('allentities.neighborhoods.sectionTitle') %></h2>
+      <form action="/api/neighborhoods" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.neighborhoods.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <input
+          type="number"
+          name="order"
+          placeholder="<%= t('allentities.neighborhoods.orderPlaceholder') %>"
+        />
+        <br /><br />
+        <select name="city" required>
+          <option value="">
+            <%= t('allentities.neighborhoods.citySelect') %>
+          </option>
+          <% cities.forEach(city => { %>
+          <option value="<%= city._id %>"><%= city.name %></option>
+          <% }) %>
+        </select>
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.neighborhoods.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.neighborhoods.table.name') %></th>
+            <th><%= t('allentities.neighborhoods.table.order') %></th>
+            <th><%= t('allentities.neighborhoods.table.city') %></th>
+            <th><%= t('allentities.neighborhoods.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% neighborhoods.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td><%= item.order !== undefined ? item.order : '' %></td>
+            <td><%= item.city ? item.city.name : '' %></td>
+            <td>
+              <a href="/api/neighborhoods/edit/<%= item._id %>">
+                <%= t('allentities.neighborhoods.table.edit') %>
+              </a>
+              <form
+                action="/api/neighborhoods/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+                onsubmit="return confirm('<%= t('allentities.neighborhoods.table.deleteConfirm') %>');"
+              >
+                <button type="submit">
+                  <%= t('allentities.neighborhoods.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="suspensionreasons">
+      <h2><%= t('allentities.suspensionReasons.sectionTitle') %></h2>
+      <form action="/api/suspensionreasons" method="POST">
+        <input
+          type="text"
+          name="name"
+          placeholder="<%= t('allentities.suspensionReasons.namePlaceholder') %>"
+          required
+        />
+        <br /><br />
+        <button type="submit">
+          <%= t('allentities.suspensionReasons.addButton') %>
+        </button>
+      </form>
+      <br />
+      <table>
+        <thead>
+          <tr>
+            <th><%= t('allentities.suspensionReasons.table.name') %></th>
+            <th><%= t('allentities.suspensionReasons.table.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% suspensionReasons.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td>
+              <a href="/api/suspensionreasons/edit/<%= item._id %>">
+                <%= t('allentities.suspensionReasons.table.edit') %>
+              </a>
+              <form
+                action="/api/suspensionreasons/delete/<%= item._id %>"
+                method="POST"
+                style="display: inline"
+                onsubmit="return confirm('<%= t('allentities.suspensionReasons.table.deleteConfirm') %>');"
+              >
+                <button type="submit">
+                  <%= t('allentities.suspensionReasons.table.delete') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

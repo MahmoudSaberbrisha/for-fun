@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= t('members.title') || 'Members' %></title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #f6fff8;
+        min-height: 100vh;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        min-height: 100vh;
+        box-sizing: border-box;
+        background: linear-gradient(120deg, #e8f5e9 0%, #ffffff 100%);
+      }
+      .sidebar {
+        min-width: 220px;
+        background: #1b5e20;
+        color: #fff;
+        padding: 30px 15px;
+        border-radius: 0 20px 20px 0;
+        box-shadow: 2px 0 8px #0001;
+        height: 100vh;
+      }
+      .main-content {
+        flex: 1;
+        padding: 40px 40px 40px 40px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      h2 {
+        color: #1b5e20;
+        margin-bottom: 20px;
+      }
+      form.add-member-form, form.edit-member-form {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px #0002;
+        padding: 30px 25px 20px 25px;
+        margin-bottom: 30px;
+        width: 100%;
+        max-width: 100%;
+      }
+      .add-member-form label,
+      .edit-member-form label {
+        color: #1b5e20;
+        font-weight: 500;
+      }
+      .add-member-form input,
+      .add-member-form select,
+      .edit-member-form input,
+      .edit-member-form select {
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        padding: 7px 10px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        width: 100%;
+        background: #f6fff8;
+        font-size: 1em;
+        transition: border 0.2s;
+      }
+      .add-member-form input:focus,
+      .add-member-form select:focus,
+      .edit-member-form input:focus,
+      .edit-member-form select:focus {
+        border: 1.5px solid #388e3c;
+        outline: none;
+      }
+      .add-member-form button,
+      .edit-member-form button,
+      button[onclick="printPage()"] {
+        background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 28px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        margin-right: 10px;
+        box-shadow: 0 2px 8px #0001;
+        transition: background 0.2s;
+      }
+      .add-member-form button:hover,
+      .edit-member-form button:hover,
+      button[onclick="printPage()"]:hover {
+        background: linear-gradient(90deg, #388e3c 0%, #43a047 100%);
+      }
+      .scroll-container {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        overflow: auto;
+        border: none;
+        padding: 0;
+        box-sizing: border-box;
+        background: none;
+      }
+      .add-member-form > div {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        width: 100%;
+      }
+      #searchInput {
+        margin-left: 20px;
+        padding: 10px 14px;
+        width: 260px;
+        height: 44px;
+        border-radius: 8px;
+        border: 1px solid #b2dfdb;
+        background: #f6fff8;
+        font-size: 1em;
+        transition: border 0.2s;
+      }
+      #searchInput:focus {
+        border: 1.5px solid #388e3c;
+        outline: none;
+      }
+      table#membersTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px #0001;
+      }
+      table#membersTable th, table#membersTable td {
+        padding: 12px 10px;
+        text-align: center;
+        border-bottom: 1px solid #e0f2f1;
+      }
+      table#membersTable th {
+        background: #388e3c;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1em;
+      }
+      table#membersTable tr:last-child td {
+        border-bottom: none;
+      }
+      table#membersTable tr:nth-child(even) td {
+        background: #f1f8e9;
+      }
+      table#membersTable button {
+        background: #1b5e20;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 0.95em;
+        margin: 2px 2px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      table#membersTable button:hover {
+        background: #388e3c;
+      }
+      @media (max-width: 1200px) {
+        .main-content {
+          padding: 20px 5vw;
+        }
+        .add-member-form > div {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+      }
+      @media (max-width: 800px) {
+        .container {
+          flex-direction: column;
+        }
+        .sidebar {
+          min-width: 100%;
+          border-radius: 0 0 20px 20px;
+          height: auto;
+        }
+        .main-content {
+          padding: 20px 2vw;
+        }
+      }
+    </style>
+    <script>
+      function printPage() {
+        window.print();
+      }
+      function filterMembers() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('membersTable');
+        const trs = table.getElementsByTagName('tr');
+        for (let i = 1; i < trs.length; i++) {
+          const tds = trs[i].getElementsByTagName('td');
+          let show = false;
+          for (let j = 0; j < tds.length; j++) {
+            if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+              show = true;
+              break;
+            }
+          }
+          trs[i].style.display = show ? '' : 'none';
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container">
+      <div class="sidebar" style="margin-right: -20px;margin-top: -2px;">
+        <%- include('partials/sidebar') %>
+      </div>
+      <div class="main-content">
+        <div class="scroll-container">
+          <% if (typeof message !== 'undefined' && message) { %>
+            <div style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px 20px; border-radius: 5px; margin-bottom: 20px;">
+              <%= message %>
+            </div>
+          <% } %>
+          <form action="/api/members/create" method="POST" class="add-member-form">
+            <h2><%= t('members.addMemberHeader') || 'Add Member' %></h2>
+            <div>
+              <div>
+                <label for="councilCode"><%= t('members.councilCodeLabel') || 'Council Code:' %></label><br />
+                <select id="councilCode" name="councilCode" required>
+                  <option value="" disabled selected><%= t('members.selectCouncilCode') || 'Select Council Code' %></option>
+                  <% if (typeof councilCodes !== 'undefined' && councilCodes.length > 0) { %>
+                    <% councilCodes.forEach(function(code) { %>
+                      <option value="<%= code %>"><%= code %></option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+              <div>
+                <label for="membershipNumber"><%= t('members.membershipNumberLabel') || 'Membership Number:' %></label><br />
+                <input type="text" id="membershipNumber" name="membershipNumber" required />
+              </div>
+              <div>
+                <label for="name"><%= t('members.nameLabel') || 'Name:' %></label><br />
+                <input type="text" id="name" name="name" required />
+              </div>
+              <div>
+                <label for="memberType"><%= t('members.memberTypeLabel') || 'Member Type:' %></label><br />
+                <select id="memberType" name="memberType" required>
+                  <option value="Chairman"><%= t('members.memberTypeChairman') || 'Chairman' %></option>
+                  <option value="BoardMember"><%= t('members.memberTypeBoardMember') || 'Board Member' %></option>
+                  <option value="Employee"><%= t('members.memberTypeEmployee') || 'Employee' %></option>
+                  <option value="Other"><%= t('members.memberTypeOther') || 'Other' %></option>
+                </select>
+              </div>
+              <div>
+                <label for="position"><%= t('members.positionLabel') || 'Position:' %></label><br />
+                <select id="position" name="position" required>
+                  <option value="" disabled selected><%= t('members.selectPosition') || 'Select Position' %></option>
+                  <% if (typeof positions !== 'undefined' && positions.length > 0) { %>
+                    <% positions.forEach(function(pos) { %>
+                      <option value="<%= pos %>"><%= pos %></option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+              <div>
+                <label for="appointmentDateHijri"><%= t('members.appointmentDateHijriLabel') || 'Appointment Date (Hijri):' %></label><br />
+                <input type="date" id="appointmentDateHijri" name="appointmentDateHijri" required />
+              </div>
+              <div>
+                <label for="subscriptionStartDate"><%= t('members.subscriptionStartDateLabel') || 'Appointment Date (Gregorian):' %></label><br />
+                <input type="date" id="subscriptionStartDate" name="subscriptionStartDate" required />
+              </div>
+              <div>
+                <label for="subscriptionEndDate"><%= t('members.subscriptionEndDateLabel') || 'Subscription End Date:' %></label><br />
+                <input type="date" id="subscriptionEndDate" name="subscriptionEndDate" required />
+              </div>
+              <div>
+                <label for="status"><%= t('members.statusLabel') || 'Status:' %></label><br />
+                <select id="status" name="status" required>
+                  <option value="Active"><%= t('members.statusActive') || 'Active' %></option>
+                  <option value="Inactive"><%= t('members.statusInactive') || 'Inactive' %></option>
+                </select>
+              </div>
+              <div>
+                <label for="shortName"><%= t('members.shortNameLabel') || 'Short Name:' %></label><br />
+                <input type="text" id="shortName" name="shortName" required />
+              </div>
+              <div>
+                <label for="nationalIdNumber"><%= t('members.nationalIdNumberLabel') || 'National ID Number:' %></label><br />
+                <input type="text" id="nationalIdNumber" name="nationalIdNumber" required />
+              </div>
+              <div>
+                <label for="phoneNumber"><%= t('members.phoneNumberLabel') || 'Phone Number:' %></label><br />
+                <input type="text" id="phoneNumber" name="phoneNumber" required />
+              </div>
+            </div>
+            <div>
+              <button type="submit">
+                <%= t('members.addButton') || 'Add Member' %>
+              </button>
+            </div>
+          </form>
+          <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <button onclick="printPage()"><%= t('members.printButton') || 'Print' %></button>
+            <input
+              type="text"
+              id="searchInput"
+              onkeyup="filterMembers()"
+              placeholder="<%= t('members.searchPlaceholder') || 'Search members...' %>"
+            />
+          </div>
+          <table id="membersTable" border="0" cellpadding="0" cellspacing="0">
+            <thead>
+              <tr>
+                <th><%= t('members.councilCodeLabel') || 'Council Code' %></th>
+                <th><%= t('members.membershipNumberLabel') || 'Membership Number' %></th>
+                <th><%= t('members.nameLabel') || 'Name' %></th>
+                <th><%= t('members.memberTypeLabel') || 'Member Type' %></th>
+                <th><%= t('members.positionLabel') || 'Position' %></th>
+                <th><%= t('members.appointmentDateHijriLabel') || 'Appointment Date (Hijri)' %></th>
+                <th><%= t('members.subscriptionStartDateLabel') || 'Appointment Date (Gregorian)' %></th>
+                <th><%= t('members.statusLabel') || 'Status' %></th>
+                <th><%= t('members.shortNameLabel') || 'Short Name' %></th>
+                <th><%= t('members.nationalIdNumberLabel') || 'National ID Number' %></th>
+                <th><%= t('members.phoneNumberLabel') || 'Phone Number' %></th>
+                <th><%= t('members.actionsLabel') || 'Actions' %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach(function(item) { %>
+                <tr>
+                  <td><%= item.councilCode %></td>
+                  <td><%= item.membershipNumber %></td>
+                  <td><%= item.name %></td>
+                  <td><%= item.memberType %></td>
+                  <td><%= item.position %></td>
+                  <td><%= item.appointmentDateHijri %></td>
+                  <td><%= item.subscriptionStartDate ? item.subscriptionStartDate.toISOString().substring(0, 10) : '' %></td>
+                  <td><%= item.status %></td>
+                  <td><%= item.shortName %></td>
+                  <td><%= item.nationalIdNumber %></td>
+                  <td><%= item.phoneNumber %></td>
+                  <td>
+                    <form action="/api/members/edit/<%= item._id %>" method="GET" style="display:inline;">
+                      <button type="submit"><%= t('members.editButton') || 'Edit' %></button>
+                    </form>
+                    <form action="/api/members/<%= item._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this member?');">
+                      <input type="hidden" name="_method" value="DELETE" />
+                      <button type="submit"><%= t('members.deleteButton') || 'Delete' %></button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+          <h2>طلبات العضوية المعلقة</h2>
+          <style>
+            #membershipRequestsTable {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+              background: #fff;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 2px 16px #0001;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            #membershipRequestsTable th, #membershipRequestsTable td {
+              padding: 12px 10px;
+              text-align: center;
+              border-bottom: 1px solid #e0f2f1;
+            }
+            #membershipRequestsTable th {
+              background: #388e3c;
+              color: #fff;
+              font-weight: 600;
+              font-size: 1em;
+            }
+            #membershipRequestsTable tr:last-child td {
+              border-bottom: none;
+            }
+            #membershipRequestsTable tr:nth-child(even) td {
+              background: #f1f8e9;
+            }
+            #membershipRequestsTable tr:hover {
+              background-color: #dcedc8;
+            }
+            #membershipRequestsTable button {
+              background: #1b5e20;
+              color: #fff;
+              border: none;
+              border-radius: 6px;
+              padding: 6px 16px;
+              font-size: 0.95em;
+              margin: 2px 2px;
+              cursor: pointer;
+              transition: background 0.2s;
+            }
+            #membershipRequestsTable button:hover {
+              background: #388e3c;
+            }
+            #noPendingRequestsRow {
+              background-color: #fff3cd;
+              color: #856404;
+              font-weight: 600;
+              font-size: 1.1em;
+              padding: 20px 0;
+            }
+          </style>
+          <table id="membershipRequestsTable" border="0" cellpadding="0" cellspacing="0">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>السجل المدني</th>
+                <th>الجنس</th>
+                <th>تاريخ الميلاد</th>
+                <th>المدينة</th>
+                <th>رقم الجوال</th>
+                <th>البريد الالكتروني</th>
+                <th>المؤهل العالي</th>
+                <th>المهنة</th>
+                <th>موظف على الكيان</th>
+                <th>مورد أو علاقة تعاقدية</th>
+                <th>تاريخ الطلب</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (membershipRequests && membershipRequests.length > 0) { %>
+                <% membershipRequests.forEach(function(request) { %>
+                  <tr>
+                    <td><%= request.name %></td>
+                    <td><%= request.nationalIdNumber %></td>
+                    <td><%= request.gender %></td>
+                    <td><%= request.birthDate ? request.birthDate.toISOString().substring(0, 10) : '' %></td>
+                    <td><%= request.city %></td>
+                    <td><%= request.phoneNumber %></td>
+                    <td><%= request.email %></td>
+                    <td><%= request.education %></td>
+                    <td><%= request.profession %></td>
+                    <td><%= request.isEmployee ? 'نعم' : 'لا' %></td>
+                    <td><%= request.isSupplier ? 'نعم' : 'لا' %></td>
+                    <td><%= request.createdAt ? request.createdAt.toISOString().substring(0, 10) : '' %></td>
+                    <td>
+                      <form action="/api/membership-requests/<%= request._id %>/accept" method="POST" style="display:inline;">
+                        <button type="submit">قبول الطلب</button>
+                      </form>
+                      <form action="/api/membership-requests/<%= request._id %>/reject" method="POST" style="display:inline;">
+                        <button type="submit">رفض الطلب</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr id="noPendingRequestsRow">
+                  <td colspan="13" style="text-align:center;">لا توجد طلبات معلقة</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+
+          <% if (editItem) { %>
+            <form action="/api/members/edit/<%= editItem._id %>" method="POST" class="edit-member-form" style="margin-top: 40px;">
+              <h2><%= t('members.editHeader') || 'Edit Member' %></h2>
+              <label for="councilCodeEdit"><%= t('members.councilCodeLabel') || 'Council Code:' %></label><br />
+              <select id="councilCodeEdit" name="councilCode" required>
+                <% if (typeof councilCodes !== 'undefined' && councilCodes.length > 0) { %>
+                  <% councilCodes.forEach(function(code) { %>
+                    <option value="<%= code %>" <%= editItem.councilCode === code ? 'selected' : '' %>><%= code %></option>
+                  <% }) %>
+                <% } %>
+              </select><br />
+              <label for="membershipNumberEdit"><%= t('members.membershipNumberLabel') || 'Membership Number:' %></label><br />
+              <input
+                type="text"
+                id="membershipNumberEdit"
+                name="membershipNumber"
+                value="<%= editItem.membershipNumber %>"
+                required
+              /><br />
+              <label for="nameEdit"><%= t('members.nameLabel') || 'Name:' %></label><br />
+              <input
+                type="text"
+                id="nameEdit"
+                name="name"
+                value="<%= editItem.name %>"
+                required
+              /><br />
+              <label for="memberTypeEdit"><%= t('members.memberTypeLabel') || 'Member Type:' %></label><br />
+              <select id="memberTypeEdit" name="memberType" required>
+                <option value="Chairman" <%= editItem.memberType === 'Chairman' ? 'selected' : '' %>><%= t('members.memberTypeChairman') || 'Chairman' %></option>
+                <option value="BoardMember" <%= editItem.memberType === 'BoardMember' ? 'selected' : '' %>><%= t('members.memberTypeBoardMember') || 'Board Member' %></option>
+                <option value="Employee" <%= editItem.memberType === 'Employee' ? 'selected' : '' %>><%= t('members.memberTypeEmployee') || 'Employee' %></option>
+                <option value="Other" <%= editItem.memberType === 'Other' ? 'selected' : '' %>><%= t('members.memberTypeOther') || 'Other' %></option>
+              </select><br />
+              <label for="positionEdit"><%= t('members.positionLabel') || 'Position:' %></label><br />
+              <select id="positionEdit" name="position" required>
+                <% if (typeof positions !== 'undefined' && positions.length > 0) { %>
+                  <% positions.forEach(function(pos) { %>
+                    <option value="<%= pos %>" <%= editItem.position === pos ? 'selected' : '' %>><%= pos %></option>
+                  <% }) %>
+                <% } %>
+              </select><br />
+              <label for="appointmentDateHijriEdit"><%= t('members.appointmentDateHijriLabel') || 'Appointment Date (Hijri):' %></label><br />
+              <input
+                type="text"
+                id="appointmentDateHijriEdit"
+                name="appointmentDateHijri"
+                value="<%= editItem.appointmentDateHijri %>"
+                required
+              /><br />
+              <label for="subscriptionStartDateEdit"><%= t('members.subscriptionStartDateLabel') || 'Appointment Date (Gregorian):' %></label><br />
+              <input
+                type="date"
+                id="subscriptionStartDateEdit"
+                name="subscriptionStartDate"
+                value="<%= editItem.subscriptionStartDate ? editItem.subscriptionStartDate.toISOString().substring(0, 10) : '' %>"
+                required
+              /><br />
+              <label for="subscriptionEndDateEdit"><%= t('members.subscriptionEndDateLabel') || 'Subscription End Date:' %></label><br />
+              <input
+                type="date"
+                id="subscriptionEndDateEdit"
+                name="subscriptionEndDate"
+                value="<%= editItem.subscriptionEndDate ? editItem.subscriptionEndDate.toISOString().substring(0, 10) : '' %>"
+                required
+              /><br />
+              <label for="statusEdit"><%= t('members.statusLabel') || 'Status:' %></label><br />
+              <select id="statusEdit" name="status" required>
+                <option value="Active" <%= editItem.status === 'Active' ? 'selected' : '' %>><%= t('members.statusActive') || 'Active' %></option>
+                <option value="Inactive" <%= editItem.status === 'Inactive' ? 'selected' : '' %>><%= t('members.statusInactive') || 'Inactive' %></option>
+              </select><br />
+              <label for="shortNameEdit"><%= t('members.shortNameLabel') || 'Short Name:' %></label><br />
+              <input
+                type="text"
+                id="shortNameEdit"
+                name="shortName"
+                value="<%= editItem.shortName %>"
+                required
+              /><br />
+              <label for="nationalIdNumberEdit"><%= t('members.nationalIdNumberLabel') || 'National ID Number:' %></label><br />
+              <input
+                type="text"
+                id="nationalIdNumberEdit"
+                name="nationalIdNumber"
+                value="<%= editItem.nationalIdNumber %>"
+                required
+              /><br />
+              <label for="phoneNumberEdit"><%= t('members.phoneNumberLabel') || 'Phone Number:' %></label><br />
+              <input
+                type="text"
+                id="phoneNumberEdit"
+                name="phoneNumber"
+                value="<%= editItem.phoneNumber %>"
+                required
+              /><br />
+              <button type="submit">
+                <%= t('members.updateButton') || 'Update Member' %>
+              </button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

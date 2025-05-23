@@ -1,0 +1,27 @@
+<tr>
+          <td colspan="10">
+            <strong>بنود التصويت:</strong>
+            <% if (session.votingItems && session.votingItems.length > 0) { %>
+              <ul class="voting-items">
+                <% session.votingItems.forEach(function(item, index) { %>
+                  <li>
+                    <%= item.title %> - <%= item.description %>
+                    <button onclick="vote('<%= session._id %>', <%= index %>, 'yes')">نعم</button>
+                    <button onclick="vote('<%= session._id %>', <%= index %>, 'no')">لا</button>
+                    <span>التصويت الحالي: نعم (<%= item.yesVotes || 0 %>), لا (<%= item.noVotes || 0 %>)</span>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <em>لا توجد بنود تصويت مضافة بعد.</em>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="10">لا توجد جلسات نشطة حالياً</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
