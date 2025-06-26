@@ -64,7 +64,11 @@ exports.memberValidations = [
 ];
 
 exports.updateMemberValidations = [
-  body("membershipNumber").optional().trim(),
+  body("membershipNumber")
+    .optional()
+    .notEmpty()
+    .withMessage("Membership number cannot be empty")
+    .trim(),
   body("name").optional().trim(),
   body("nationalIdNumber")
     .optional()

@@ -4,9 +4,9 @@
     color: #fff;
     min-height: 100vh;
     width: 250px;
-    height: 800px;
+    height: 100%; 
     box-shadow: 0 8px 32px 0 rgba(25, 135, 84, 0.37), 0 1.5px 8px 0 #157347;
-    /* border-radius: 18px 0 0 18px; */
+    border-radius: 0 18px 18px 0;
     padding: 1.5rem 1rem;
     margin-top: -22px;
     transition: box-shadow 0.3s, width 0.3s ease;
@@ -326,6 +326,33 @@
       <a href="/membership-login" class="sidebar-link">
         <i class="fas fa-user-plus"></i> طلب عضوية / تسجيل دخول
       </a>
+    </li>
+    <li class="dropdown">
+      <button class="dropdown-toggle" aria-expanded="false" aria-controls="profile-menu">
+        <i class="fas fa-user-circle"></i> الملف الشخصي
+      </button>
+      <ul id="profile-menu" class="dropdown-menu" hidden>
+        <li>
+          <a href="/api/members/profile/basic-data" class="sidebar-link">
+            <i class="fas fa-id-card"></i> بيانات اساسيه
+          </a>
+        </li>
+        <li>
+          <a href="/api/members/profile/membership-data" class="sidebar-link">
+            <i class="fas fa-address-card"></i> بيانات العضويه
+          </a>
+        </li>
+        <li>
+          <a href="/api/members/profile/attachments" class="sidebar-link">
+            <i class="fas fa-paperclip"></i> اضافه مرفقات
+          </a>
+        </li>
+        <li>
+          <a href="/api/members/profile/account-data" class="sidebar-link">
+            <i class="fas fa-wallet"></i> بيانات الحساب
+          </a>
+        </li>
+      </ul>
     </li>
   </nav>
   <div style="text-align: center; margin-top: 2rem">

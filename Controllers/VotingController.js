@@ -5,14 +5,12 @@ exports.createVoting = async (req, res, next) => {
   try {
     const { sessionId, title, options, status } = req.body;
 
-    const newVoting = new Voting({
+    const newVoting = await Voting.create({
       sessionId,
       title,
       options,
       status,
     });
-
-    await newVoting.save();
 
     res.status(201).json({
       success: true,
@@ -27,8 +25,9 @@ exports.createVoting = async (req, res, next) => {
 // Get all open votings
 exports.getOpenVotings = async (req, res, next) => {
   try {
-    const votings = await Voting.find({ status: "Open" }).sort({
-      createdAt: -1,
+    const votings = await Voting.findAll({
+      where: { status: "Open" },
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
@@ -43,8 +42,9 @@ exports.getOpenVotings = async (req, res, next) => {
 // Render votings page with open votings
 exports.renderVotingsPage = async (req, res, next) => {
   try {
-    const votings = await Voting.find({ status: "Open" }).sort({
-      createdAt: -1,
+    const votings = await Voting.findAll({
+      where: { status: "Open" },
+      order: [["createdAt", "DESC"]],
     });
     res.render("votings", { votings });
   } catch (err) {

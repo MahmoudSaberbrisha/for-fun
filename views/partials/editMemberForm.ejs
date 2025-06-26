@@ -1,0 +1,90 @@
+<% if (editItem) { %>
+    <form action="/api/members/edit/<%= editItem.id %>" method="POST" class="edit-member-form"
+        style="margin-top: 40px;">
+        <h2>
+            <%= t('members.editHeader') || 'Edit Member' %>
+        </h2>
+        <!-- Removed Council Code field -->
+        <div>
+            <label for="membershipNumberEdit">رقم العضوية:</label><br />
+            <input type="text" id="membershipNumberEdit" name="membershipNumber"
+                value="<%= editItem.membershipNumber %>" readonly /><br />
+        </div>
+        <label for="nameEdit">
+            <%= t('members.nameLabel') || 'Name:' %>
+        </label><br />
+        <input type="text" id="nameEdit" name="name" value="<%= editItem.name %>" required /><br />
+        <label for="memberTypeEdit">
+            <%= t('members.memberTypeLabel') || 'Member Type:' %>
+        </label><br />
+        <select id="memberTypeEdit" name="memberType" required>
+            <option value="Chairman" <%=editItem.memberType==='Chairman' ? 'selected' : '' %>><%=
+                    t('members.memberTypeChairman') || 'Chairman' %>
+            </option>
+            <option value="BoardMember" <%=editItem.memberType==='BoardMember' ? 'selected' : '' %>><%=
+                    t('members.memberTypeBoardMember') || 'Board Member' %>
+            </option>
+            <option value="Employee" <%=editItem.memberType==='Employee' ? 'selected' : '' %>><%=
+                    t('members.memberTypeEmployee') || 'Employee' %>
+            </option>
+            <option value="Other" <%=editItem.memberType==='Other' ? 'selected' : '' %>><%= t('members.memberTypeOther')
+                    || 'Other' %>
+            </option>
+        </select><br />
+        <label for="positionEdit">
+            <%= t('members.positionLabel') || 'Position:' %>
+        </label><br />
+        <select id="positionEdit" name="position" required>
+            <% if (typeof positions !=='undefined' && positions.length> 0) { %>
+                <% positions.forEach(function(pos) { %>
+                    <option value="<%= pos %>" <%=editItem.position===pos ? 'selected' : '' %>><%= pos %>
+                    </option>
+                    <% }) %>
+                        <% } %>
+        </select><br />
+        <label for="appointmentDateHijriEdit">
+            <%= t('members.appointmentDateHijriLabel') || 'Appointment Date (Hijri):' %>
+        </label><br />
+        <input type="text" id="appointmentDateHijriEdit" name="appointmentDateHijri"
+            value="<%= editItem.appointmentDateHijri %>" required /><br />
+        <label for="subscriptionStartDateEdit">
+            <%= t('members.subscriptionStartDateLabel') || 'Appointment Date (Gregorian):' %>
+        </label><br />
+        <input type="date" id="subscriptionStartDateEdit" name="subscriptionStartDate"
+            value="<%= editItem.subscriptionStartDate ? editItem.subscriptionStartDate.toISOString().substring(0, 10) : '' %>"
+            required /><br />
+        <label for="subscriptionEndDateEdit">
+            <%= t('members.subscriptionEndDateLabel') || 'Subscription End Date:' %>
+        </label><br />
+        <input type="date" id="subscriptionEndDateEdit" name="subscriptionEndDate"
+            value="<%= editItem.subscriptionEndDate ? editItem.subscriptionEndDate.toISOString().substring(0, 10) : '' %>"
+            required /><br />
+        <label for="statusEdit">
+            <%= t('members.statusLabel') || 'Status:' %>
+        </label><br />
+        <select id="statusEdit" name="status" required>
+            <option value="Active" <%=editItem.status==='Active' ? 'selected' : '' %>><%= t('members.statusActive')
+                    || 'Active' %>
+            </option>
+            <option value="Inactive" <%=editItem.status==='Inactive' ? 'selected' : '' %>><%=
+                    t('members.statusInactive') || 'Inactive' %>
+            </option>
+        </select><br />
+        <label for="shortNameEdit">
+            <%= t('members.shortNameLabel') || 'Short Name:' %>
+        </label><br />
+        <input type="text" id="shortNameEdit" name="shortName" value="<%= editItem.shortName %>" required /><br />
+        <label for="nationalIdNumberEdit">
+            <%= t('members.nationalIdNumberLabel') || 'National ID Number:' %>
+        </label><br />
+        <input type="text" id="nationalIdNumberEdit" name="nationalIdNumber" value="<%= editItem.nationalIdNumber %>"
+            required /><br />
+        <label for="phoneNumberEdit">
+            <%= t('members.phoneNumberLabel') || 'Phone Number:' %>
+        </label><br />
+        <input type="text" id="phoneNumberEdit" name="phoneNumber" value="<%= editItem.phoneNumber %>" required /><br />
+        <button type="submit">
+            <%= t('members.updateButton') || 'Update Member' %>
+        </button>
+    </form>
+    <% } %>

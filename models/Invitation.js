@@ -1,17 +1,47 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const InvitationSchema = new mongoose.Schema(
+const Invitation = sequelize.define(
+  "Invitation",
   {
-    invitationNumber: { type: String, required: true, unique: true },
-    invitationDate: { type: Date, required: true },
-    meetingType: { type: String, required: true },
-    memberName: { type: String, required: true },
-    memberTitleEnd: { type: String, required: true },
-    sessionNumber: { type: String, required: true },
-    meetingPlace: { type: String, required: true },
-    subject: { type: String, required: true },
+    invitationNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    invitationDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    meetingType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    memberName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    memberTitleEnd: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    sessionNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    meetingPlace: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    subject: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "Invitations",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Invitation", InvitationSchema);
+module.exports = Invitation;

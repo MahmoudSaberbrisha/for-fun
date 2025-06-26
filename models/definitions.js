@@ -1,84 +1,137 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-// 1. Work Destinations Schema
-const WorkDestinationSchema = new Schema(
+const WorkDestination = sequelize.define(
+  "WorkDestination",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "WorkDestinations",
+    timestamps: true,
+  }
 );
 
-// 2. Membership Types Schema
-const MembershipTypeSchema = new Schema(
+const MembershipType = sequelize.define(
+  "MembershipType",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "MembershipTypes",
+    timestamps: true,
+  }
 );
 
-// 3. Member Jobs Schema
-const MemberJobSchema = new Schema(
+const MemberJob = sequelize.define(
+  "MemberJob",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "MemberJobs",
+    timestamps: true,
+  }
 );
 
-// 4. Member Titles Schema
-const MemberTitleSchema = new Schema(
+const MemberTitle = sequelize.define(
+  "MemberTitle",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "MemberTitles",
+    timestamps: true,
+  }
 );
 
-// 5. Meeting Places Schema
-const MeetingPlaceSchema = new Schema(
+const MeetingPlace = sequelize.define(
+  "MeetingPlace",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "MeetingPlaces",
+    timestamps: true,
+  }
 );
 
-// 6. Cities Schema
-const CitySchema = new Schema(
+const City = sequelize.define(
+  "City",
   {
-    name: { type: String, required: true },
-    order: { type: Number },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    order: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "Cities",
+    timestamps: true,
+  }
 );
 
-// 7. Neighborhoods Schema
-const NeighborhoodSchema = new Schema(
+const Neighborhood = sequelize.define(
+  "Neighborhood",
   {
-    name: { type: String, required: true },
-    order: { type: Number },
-    city: { type: Schema.Types.ObjectId, ref: "City", required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    order: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "Neighborhoods",
+    timestamps: true,
+  }
 );
 
-// 8. Membership Suspension Reasons Schema
-const MembershipSuspensionReasonSchema = new Schema(
+// Associations
+Neighborhood.belongsTo(City, { foreignKey: "cityId", allowNull: false });
+City.hasMany(Neighborhood, { foreignKey: "cityId" });
+
+const MembershipSuspensionReason = sequelize.define(
+  "MembershipSuspensionReason",
   {
-    name: { type: String, required: true },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "MembershipSuspensionReasons",
+    timestamps: true,
+  }
 );
 
-// Export models
 module.exports = {
-  WorkDestination: mongoose.model("WorkDestination", WorkDestinationSchema),
-  MembershipType: mongoose.model("MembershipType", MembershipTypeSchema),
-  MemberJob: mongoose.model("MemberJob", MemberJobSchema),
-  MemberTitle: mongoose.model("MemberTitle", MemberTitleSchema),
-  MeetingPlace: mongoose.model("MeetingPlace", MeetingPlaceSchema),
-  City: mongoose.model("City", CitySchema),
-  Neighborhood: mongoose.model("Neighborhood", NeighborhoodSchema),
-  MembershipSuspensionReason: mongoose.model(
-    "MembershipSuspensionReason",
-    MembershipSuspensionReasonSchema
-  ),
+  WorkDestination,
+  MembershipType,
+  MemberJob,
+  MemberTitle,
+  MeetingPlace,
+  City,
+  Neighborhood,
+  MembershipSuspensionReason,
 };

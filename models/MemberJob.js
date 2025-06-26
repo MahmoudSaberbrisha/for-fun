@@ -1,15 +1,19 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const MemberJobSchema = new mongoose.Schema(
+const MemberJob = sequelize.define(
+  "MemberJob",
   {
     name: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "MemberJobs",
+    timestamps: true,
+  }
 );
 
-module.exports =
-  mongoose.models.MemberJob || mongoose.model("MemberJob", MemberJobSchema);
+module.exports = MemberJob;

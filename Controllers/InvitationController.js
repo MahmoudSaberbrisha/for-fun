@@ -1,4 +1,5 @@
 const Invitation = require("../models/Invitation");
+const { Op } = require("sequelize");
 
 // Create a new invitation
 exports.createInvitation = async (req, res, next) => {
@@ -14,7 +15,7 @@ exports.createInvitation = async (req, res, next) => {
       subject,
     } = req.body;
 
-    const newInvitation = new Invitation({
+    const newInvitation = await Invitation.create({
       invitationNumber,
       invitationDate,
       meetingType,
@@ -24,8 +25,6 @@ exports.createInvitation = async (req, res, next) => {
       meetingPlace,
       subject,
     });
-
-    await newInvitation.save();
 
     res.status(201).json({
       success: true,
@@ -40,7 +39,9 @@ exports.createInvitation = async (req, res, next) => {
 // Get all invitations
 exports.getAllInvitations = async (req, res, next) => {
   try {
-    const invitations = await Invitation.find().sort({ invitationDate: -1 });
+    const invitations = await Invitation.findAll({
+      order: [["invitationDate", "DESC"]],
+    });
     res.status(200).json({
       success: true,
       data: invitations,
@@ -53,7 +54,9 @@ exports.getAllInvitations = async (req, res, next) => {
 // Render invitations page
 exports.renderInvitationsPage = async (req, res, next) => {
   try {
-    const invitations = await Invitation.find().sort({ invitationDate: -1 });
+    const invitations = await Invitation.findAll({
+      order: [["invitationDate", "DESC"]],
+    });
     res.render("invitations", { invitations });
   } catch (err) {
     next(err);
@@ -66,13 +69,15 @@ exports.updateInvitation = async (req, res, next) => {
     const invitationId = req.params.id;
     const updateData = req.body;
 
-    const updatedInvitation = await Invitation.findByIdAndUpdate(
-      invitationId,
+    const [updatedCount, [updatedInvitation]] = await Invitation.update(
       updateData,
-      { new: true }
+      {
+        where: { id: invitationId },
+        returning: true,
+      }
     );
 
-    if (!updatedInvitation) {
+    if (updatedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Invitation not found" });
@@ -93,9 +98,11 @@ exports.deleteInvitation = async (req, res, next) => {
   try {
     const invitationId = req.params.id;
 
-    const deletedInvitation = await Invitation.findByIdAndDelete(invitationId);
+    const deletedCount = await Invitation.destroy({
+      where: { id: invitationId },
+    });
 
-    if (!deletedInvitation) {
+    if (deletedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Invitation not found" });
@@ -122,29 +129,30 @@ exports.searchInvitations = async (req, res, next) => {
       subject,
     } = req.query;
 
-    const query = {};
+    const where = {};
 
     if (invitationNumber) {
-      query.invitationNumber = { $regex: invitationNumber, $options: "i" };
+      where.invitationNumber = { [Op.like]: `%${invitationNumber}%` };
     }
     if (meetingType) {
-      query.meetingType = { $regex: meetingType, $options: "i" };
+      where.meetingType = { [Op.like]: `%${meetingType}%` };
     }
     if (memberName) {
-      query.memberName = { $regex: memberName, $options: "i" };
+      where.memberName = { [Op.like]: `%${memberName}%` };
     }
     if (sessionNumber) {
-      query.sessionNumber = { $regex: sessionNumber, $options: "i" };
+      where.sessionNumber = { [Op.like]: `%${sessionNumber}%` };
     }
     if (meetingPlace) {
-      query.meetingPlace = { $regex: meetingPlace, $options: "i" };
+      where.meetingPlace = { [Op.like]: `%${meetingPlace}%` };
     }
     if (subject) {
-      query.subject = { $regex: subject, $options: "i" };
+      where.subject = { [Op.like]: `%${subject}%` };
     }
 
-    const invitations = await Invitation.find(query).sort({
-      invitationDate: -1,
+    const invitations = await Invitation.findAll({
+      where,
+      order: [["invitationDate", "DESC"]],
     });
 
     res.status(200).json({

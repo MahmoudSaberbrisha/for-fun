@@ -1,68 +1,66 @@
 const MemberJob = require("../models/MemberJob");
+const { validationResult } = require("express-validator");
 
-// Get all member jobs
-exports.getAllMemberJobs = async (req, res, next) => {
+// Render the member jobs page with list and edit item if any
+exports.getAllMemberJobs = async (req, res) => {
   try {
-    const jobs = await MemberJob.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      data: jobs,
-    });
-  } catch (err) {
-    next(err);
+    const items = await MemberJob.findAll({ order: [["createdAt", "ASC"]] });
+    res.json(items);
+  } catch (error) {
+    console.error("Error fetching member jobs:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// Create a new member job
-exports.createMemberJob = async (req, res, next) => {
+// Handle create new member job
+exports.createMemberJob = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const { name } = req.body;
-    if (!name) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Name is required" });
-    }
-    const newJob = new MemberJob({ name });
-    await newJob.save();
-    res.status(201).json({ success: true, data: newJob });
-  } catch (err) {
-    next(err);
+    const newJob = await MemberJob.create({ name });
+    res.status(201).json(newJob);
+  } catch (error) {
+    console.error("Error creating member job:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// Update a member job by ID
-exports.updateMemberJob = async (req, res, next) => {
+// Handle update member job
+exports.updateMemberJob = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
     const { name } = req.body;
-    const job = await MemberJob.findById(id);
-    if (!job) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Member job not found" });
+    const [updatedCount, [updatedJob]] = await MemberJob.update(
+      { name },
+      {
+        where: { id },
+        returning: true,
+      }
+    );
+    if (updatedCount === 0) {
+      return res.status(404).json({ message: "Member job not found" });
     }
-    job.name = name || job.name;
-    await job.save();
-    res.status(200).json({ success: true, data: job });
-  } catch (err) {
-    next(err);
+    res.json(updatedJob);
+  } catch (error) {
+    console.error("Error updating member job:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// Delete a member job by ID
-exports.deleteMemberJob = async (req, res, next) => {
+// Handle delete member job
+exports.deleteMemberJob = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedJob = await MemberJob.findByIdAndDelete(id);
-    if (!deletedJob) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Member job not found" });
+    const id = req.params.id;
+    const deletedCount = await MemberJob.destroy({ where: { id } });
+    if (deletedCount === 0) {
+      return res.status(404).json({ message: "Member job not found" });
     }
-    res
-      .status(200)
-      .json({ success: true, message: "Member job deleted successfully" });
-  } catch (err) {
-    next(err);
+    res.json({ message: "Member job deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting member job:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

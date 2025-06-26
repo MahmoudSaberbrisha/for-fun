@@ -1,45 +1,58 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
+const Member = require("./Member");
 
-const SubscriptionLogSchema = new mongoose.Schema({
-  memberId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Member",
-    required: true,
+const SubscriptionLog = sequelize.define(
+  "SubscriptionLog",
+  {
+    subscriptionValue: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    operationType: {
+      type: DataTypes.ENUM("استحقاق", "سداد"),
+      allowNull: false,
+    },
+    startYear: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    endYear: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    receiptDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    receiptNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    paymentMethod: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
-  subscriptionValue: {
-    type: Number,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
-  operationType: {
-    type: String,
-    enum: ["استحقاق", "سداد"],
-    required: true,
-  },
-  startYear: {
-    type: Number,
-    required: true,
-  },
-  endYear: {
-    type: Number,
-    required: true,
-  },
-  receiptDate: {
-    type: Date,
-  },
-  receiptNumber: {
-    type: String,
-  },
-  paymentMethod: {
-    type: String,
-  },
-  description: {
-    type: String,
-  },
+  {
+    tableName: "SubscriptionLogs",
+    timestamps: false,
+  }
+);
+
+SubscriptionLog.belongsTo(Member, { foreignKey: "memberId", as: "member" });
+Member.hasMany(SubscriptionLog, {
+  foreignKey: "memberId",
+  as: "subscriptionLogs",
 });
 
-module.exports = mongoose.model("SubscriptionLog", SubscriptionLogSchema);
+module.exports = SubscriptionLog;

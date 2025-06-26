@@ -18,6 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
+    "ejs-lint": "^2.0.1",
     "env": "^0.0.2",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
@@ -25,9 +26,14 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
     "multer": "^1.4.5-lts.2",
+    "mysql2": "^3.14.1",
+    "sequelize": "^6.37.7",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "chai": "^5.2.0",
+    "mocha": "^11.7.1",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.1.1"
   }
 }

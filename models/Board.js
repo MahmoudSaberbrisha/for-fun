@@ -1,52 +1,59 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
+const Member = require("./Member");
 
-const BoardSchema = new mongoose.Schema(
+const Board = sequelize.define(
+  "Board",
   {
     boardCode: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
     },
     startDateHijri: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     startDateGregorian: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     appointmentDecisionNumber: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     endDateHijri: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     endDateGregorian: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     decisionImage: {
-      type: String, // store image path or URL
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     boardStatus: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     reason: {
-      type: String,
-      required: false,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-    members: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Member",
-      },
-    ],
   },
-  { timestamps: true }
+  {
+    tableName: "Boards",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Board", BoardSchema);
+// Many-to-many association with Member through BoardMembers join table
+Board.belongsToMany(Member, { through: "BoardMembers", foreignKey: "boardId" });
+Member.belongsToMany(Board, {
+  through: "BoardMembers",
+  foreignKey: "memberId",
+});
+
+module.exports = Board;

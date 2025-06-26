@@ -1,80 +1,73 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const votingItemSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
+const Session = sequelize.define(
+  "Session",
+  {
+    sessionNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    day: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    time: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    secretary: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    topic: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("Open", "Closed"),
+      allowNull: false,
+      defaultValue: "Open",
+    },
+    topics: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    votingItems: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  description: {
-    type: String,
-  },
-  votes: {
-    type: [String], // array of 'yes' or 'no' strings
-    default: [],
-  },
-});
+  {
+    tableName: "Sessions",
+    timestamps: false,
+  }
+);
 
-const topicSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-});
-
-const sessionSchema = new mongoose.Schema({
-  sessionNumber: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  day: {
-    type: String,
-    required: true,
-  },
-  time: {
-    type: String,
-    required: true,
-  },
-  duration: {
-    type: Number,
-    required: true,
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  secretary: {
-    type: String,
-    required: true,
-  },
-  topic: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-  },
-  description: {
-    type: String,
-  },
-  status: {
-    type: String,
-    enum: ["Open", "Closed"],
-    default: "Open",
-  },
-  topics: [topicSchema],
-  votingItems: [votingItemSchema],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-module.exports = mongoose.model("Session", sessionSchema);
+module.exports = Session;

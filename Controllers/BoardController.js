@@ -1,10 +1,14 @@
 const Board = require("../models/Board");
+const Member = require("../models/Member");
 const path = require("path");
 const fs = require("fs");
 
 exports.getAllBoards = async (req, res) => {
   try {
-    const boards = await Board.find().sort({ createdAt: -1 });
+    const boards = await Board.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [{ model: Member }],
+    });
 
     // Generate new boardCode
     let newBoardCode = "B001";
@@ -18,8 +22,9 @@ exports.getAllBoards = async (req, res) => {
     }
 
     // Fetch all members
-    const Member = require("../models/Member");
-    const members = await Member.find().sort({ createdAt: -1 });
+    const members = await Member.findAll({
+      order: [["createdAt", "DESC"]],
+    });
 
     res.render("board", { boards, newBoardCode, members });
   } catch (error) {
@@ -29,7 +34,9 @@ exports.getAllBoards = async (req, res) => {
 
 exports.getBoardById = async (req, res) => {
   try {
-    const board = await Board.findById(req.params.id);
+    const board = await Board.findByPk(req.params.id, {
+      include: [{ model: Member }],
+    });
     if (!board) {
       return res.status(404).send("Board not found");
     }
@@ -70,7 +77,7 @@ exports.createBoard = async (req, res) => {
       }
     }
 
-    const newBoard = new Board({
+    const newBoard = await Board.create({
       boardCode,
       startDateHijri,
       startDateGregorian,
@@ -80,10 +87,12 @@ exports.createBoard = async (req, res) => {
       decisionImage: decisionImagePath,
       boardStatus,
       reason,
-      members: membersArray,
     });
 
-    await newBoard.save();
+    if (membersArray.length > 0) {
+      await newBoard.setMembers(membersArray);
+    }
+
     res.redirect("/boards");
   } catch (error) {
     res.status(500).send("Error creating board");
@@ -92,7 +101,7 @@ exports.createBoard = async (req, res) => {
 
 exports.updateBoard = async (req, res) => {
   try {
-    const board = await Board.findById(req.params.id);
+    const board = await Board.findByPk(req.params.id);
     if (!board) {
       return res.status(404).send("Board not found");
     }
@@ -106,6 +115,7 @@ exports.updateBoard = async (req, res) => {
       endDateGregorian,
       boardStatus,
       reason,
+      members,
     } = req.body;
 
     board.boardCode = boardCode;
@@ -134,6 +144,22 @@ exports.updateBoard = async (req, res) => {
     }
 
     await board.save();
+
+    // Update members association
+    let membersArray = [];
+    if (members) {
+      if (Array.isArray(members)) {
+        membersArray = members;
+      } else {
+        membersArray = [members];
+      }
+    }
+    if (membersArray.length > 0) {
+      await board.setMembers(membersArray);
+    } else {
+      await board.setMembers([]);
+    }
+
     res.redirect("/boards");
   } catch (error) {
     res.status(500).send("Error updating board");

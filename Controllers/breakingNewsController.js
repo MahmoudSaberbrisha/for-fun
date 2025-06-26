@@ -1,14 +1,13 @@
 const BreakingNews = require("../models/BreakingNews");
+const { Op } = require("sequelize");
 
 exports.createBreakingNews = async (req, res, next) => {
   try {
     const { content } = req.body;
 
-    const newNews = new BreakingNews({
+    const newNews = await BreakingNews.create({
       content,
     });
-
-    await newNews.save();
 
     // Redirect to breaking news view page after creation
     res.redirect("/breakingnews");
@@ -19,7 +18,9 @@ exports.createBreakingNews = async (req, res, next) => {
 
 exports.getAllBreakingNews = async (req, res, next) => {
   try {
-    const news = await BreakingNews.find().sort({ createdAt: -1 });
+    const news = await BreakingNews.findAll({
+      order: [["createdAt", "DESC"]],
+    });
 
     // Render breakingnews view with all news items
     res.render("breakingnews", {
@@ -33,17 +34,19 @@ exports.getAllBreakingNews = async (req, res, next) => {
 
 exports.updateBreakingNews = async (req, res, next) => {
   try {
-    const { id } = req.params; // Gets the _id from URL parameters
+    const { id } = req.params; // Gets the id from URL parameters
     const updates = req.body; // Gets the updated data from request body
 
-    const updatedNews = await BreakingNews.findByIdAndUpdate(id, updates, {
-      new: true, // Returns the updated document
-      runValidators: true, // Runs validation on update
+    const [updatedCount, [updatedNews]] = await BreakingNews.update(updates, {
+      where: { id },
+      returning: true,
     });
 
-    if (!updatedNews) {
+    if (updatedCount === 0) {
       // Render breakingnews view with error message if not found
-      const news = await BreakingNews.find().sort({ createdAt: -1 });
+      const news = await BreakingNews.findAll({
+        order: [["createdAt", "DESC"]],
+      });
       return res.status(404).render("breakingnews", {
         items: news,
         editItem: null,
@@ -62,11 +65,14 @@ exports.searchBreakingNews = async (req, res, next) => {
   try {
     const { keyword } = req.query;
 
-    const searchQuery = {
-      content: { $regex: keyword, $options: "i" }, // case-insensitive search
-    };
-
-    const news = await BreakingNews.find(searchQuery).sort({ createdAt: -1 });
+    const news = await BreakingNews.findAll({
+      where: {
+        content: {
+          [Op.iLike]: `%${keyword}%`,
+        },
+      },
+      order: [["createdAt", "DESC"]],
+    });
 
     // Render breakingnews view with filtered news items
     res.render("breakingnews", {
@@ -81,12 +87,14 @@ exports.searchBreakingNews = async (req, res, next) => {
 // New controller method to render breakingnews.ejs view with interactive content
 exports.getBreakingNewsView = async (req, res, next) => {
   try {
-    const news = await BreakingNews.find().sort({ createdAt: -1 });
+    const news = await BreakingNews.findAll({
+      order: [["createdAt", "DESC"]],
+    });
     const editItemId = req.query.editId;
     let editItem = null;
 
     if (editItemId) {
-      editItem = await BreakingNews.findById(editItemId);
+      editItem = await BreakingNews.findByPk(editItemId);
     }
 
     res.render("breakingnews", {

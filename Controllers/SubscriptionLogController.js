@@ -1,5 +1,7 @@
 const SubscriptionLog = require("../models/SubscriptionLog");
+const Member = require("../models/Member");
 
+// Add a subscription log
 exports.addSubscriptionLog = async (req, res) => {
   try {
     const {
@@ -41,9 +43,7 @@ exports.addSubscriptionLog = async (req, res) => {
       newLogData.description = description;
     }
 
-    const newLog = new SubscriptionLog(newLogData);
-
-    await newLog.save();
+    const newLog = await SubscriptionLog.create(newLogData);
     res
       .status(201)
       .json({ message: "Subscription log added successfully", log: newLog });
@@ -53,9 +53,13 @@ exports.addSubscriptionLog = async (req, res) => {
   }
 };
 
+// Get all subscription logs
 exports.getSubscriptionLogs = async (req, res) => {
   try {
-    const logs = await SubscriptionLog.find().sort({ date: -1 });
+    const logs = await SubscriptionLog.findAll({
+      order: [["date", "DESC"]],
+      include: [{ model: Member, as: "member" }],
+    });
     res.render("subscriptionLogs", { logs });
   } catch (error) {
     console.error("Error fetching subscription logs:", error);
@@ -63,6 +67,7 @@ exports.getSubscriptionLogs = async (req, res) => {
   }
 };
 
+// Render add subscription log form
 exports.renderAddSubscriptionLogForm = (req, res) => {
   res.render("addSubscriptionLog", {
     lang: res.locals.lang,
@@ -70,6 +75,7 @@ exports.renderAddSubscriptionLogForm = (req, res) => {
   });
 };
 
+// Handle add subscription log form submission
 exports.handleAddSubscriptionLogForm = async (req, res) => {
   try {
     const {
@@ -111,8 +117,7 @@ exports.handleAddSubscriptionLogForm = async (req, res) => {
       newLogData.description = description;
     }
 
-    const newLog = new SubscriptionLog(newLogData);
-    await newLog.save();
+    await SubscriptionLog.create(newLogData);
 
     res.redirect("/subscription-logs");
   } catch (error) {
@@ -122,6 +127,7 @@ exports.handleAddSubscriptionLogForm = async (req, res) => {
   }
 };
 
+// Get member subscription payment screen
 exports.getMemberSubscriptionPaymentScreen = async (req, res) => {
   try {
     const memberId = req.userId;
@@ -129,10 +135,10 @@ exports.getMemberSubscriptionPaymentScreen = async (req, res) => {
       return res.status(401).send("Unauthorized: Member not logged in");
     }
 
-    const dueSubscriptions = await SubscriptionLog.find({
-      memberId,
-      operationType: "استحقاق",
-    }).sort({ startYear: 1 });
+    const dueSubscriptions = await SubscriptionLog.findAll({
+      where: { memberId, operationType: "استحقاق" },
+      order: [["startYear", "ASC"]],
+    });
 
     res.render("memberSubscriptionPayment", { dueSubscriptions });
   } catch (error) {
@@ -141,7 +147,7 @@ exports.getMemberSubscriptionPaymentScreen = async (req, res) => {
   }
 };
 
-// New method to handle subscription payment form submission
+// Handle subscription payment form submission
 exports.handleMemberSubscriptionPayment = async (req, res) => {
   try {
     const memberId = req.userId;
@@ -154,15 +160,13 @@ exports.handleMemberSubscriptionPayment = async (req, res) => {
       return res.status(400).send("No subscriptions selected for payment");
     }
 
-    // Normalize subscriptionIds to array
     const idsArray = Array.isArray(subscriptionIds)
       ? subscriptionIds
       : [subscriptionIds];
 
-    // For each selected subscription, create a new "سداد" (payment) log entry
     const paymentLogs = idsArray.map((subId) => ({
       memberId,
-      subscriptionValue: 0, // or fetch actual value if needed
+      subscriptionValue: 0,
       date: new Date(),
       operationType: "سداد",
       startYear: 0,
@@ -170,7 +174,7 @@ exports.handleMemberSubscriptionPayment = async (req, res) => {
       description: `سداد اشتراك رقم ${subId}`,
     }));
 
-    await SubscriptionLog.insertMany(paymentLogs);
+    await SubscriptionLog.bulkCreate(paymentLogs);
 
     res.redirect("/member-subscriptions/payment");
   } catch (error) {

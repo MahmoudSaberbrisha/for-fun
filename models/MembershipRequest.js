@@ -1,24 +1,71 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const membershipRequestSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  nationalIdNumber: { type: String, required: true, unique: true, trim: true },
-  gender: { type: String, enum: ["ذكر", "انثى"], required: true },
-  birthDate: { type: Date, required: true },
-  city: { type: String, required: true, trim: true },
-  phoneNumber: { type: String, required: true, trim: true },
-  email: { type: String, required: true, trim: true },
-  education: {
-    type: String,
-    enum: ["بكالوريوس", "ماجستير", "دكتوراه", "دبلوم عالي", "غير ذلك"],
-    required: true,
+const MembershipRequest = sequelize.define(
+  "MembershipRequest",
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    nationalIdNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    birthDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    education: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    profession: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    cvFilePath: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isEmployee: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isSupplier: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    pledge: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  profession: { type: String, required: true, trim: true },
-  cvFilePath: { type: String }, // store file path or URL
-  isEmployee: { type: Boolean, default: false },
-  isSupplier: { type: Boolean, default: false },
-  pledge: { type: Boolean, required: true },
-  createdAt: { type: Date, default: Date.now },
-});
+  {
+    tableName: "MembershipRequests",
+    timestamps: false,
+  }
+);
 
-module.exports = mongoose.model("MembershipRequest", membershipRequestSchema);
+module.exports = MembershipRequest;

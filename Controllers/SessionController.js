@@ -19,7 +19,7 @@ exports.createSession = async (req, res, next) => {
       status,
     } = req.body;
 
-    const newSession = new Session({
+    const newSession = await Session.create({
       sessionNumber,
       date,
       day,
@@ -31,9 +31,9 @@ exports.createSession = async (req, res, next) => {
       title,
       description,
       status,
+      topics: [],
+      votingItems: [],
     });
-
-    await newSession.save();
 
     res.status(201).json({
       success: true,
@@ -48,7 +48,10 @@ exports.createSession = async (req, res, next) => {
 // Get all open sessions
 exports.getOpenSessions = async (req, res, next) => {
   try {
-    const sessions = await Session.find({ status: "Open" }).sort({ date: -1 });
+    const sessions = await Session.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
@@ -62,14 +65,21 @@ exports.getOpenSessions = async (req, res, next) => {
 // Render sessions page with open sessions
 exports.renderSessionsPage = async (req, res, next) => {
   try {
-    const sessions = await Session.find({ status: "Open" }).sort({ date: -1 });
-    const meetingPlaces = await MeetingPlace.find().sort({ name: 1 });
-    const members = await Member.find({ status: "Active" }).sort({ name: 1 });
+    const sessions = await Session.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
+    });
+    const meetingPlaces = await MeetingPlace.findAll({
+      order: [["name", "ASC"]],
+    });
+    const members = await Member.findAll({
+      where: { status: "Active" },
+      order: [["name", "ASC"]],
+    });
 
     // Calculate next session number
     let nextSessionNumber = "S1";
     if (sessions.length > 0) {
-      // Extract numeric part from sessionNumber like "S1", "S2"
       const sessionNumbers = sessions
         .map((s) => s.sessionNumber)
         .filter((sn) => typeof sn === "string" && sn.match(/^S\d+$/))
@@ -97,15 +107,12 @@ exports.updateSession = async (req, res, next) => {
     const sessionId = req.params.id;
     const updateData = req.body;
 
-    const updatedSession = await Session.findByIdAndUpdate(
-      sessionId,
-      updateData,
-      {
-        new: true,
-      }
-    );
+    const [updatedCount, [updatedSession]] = await Session.update(updateData, {
+      where: { id: sessionId },
+      returning: true,
+    });
 
-    if (!updatedSession) {
+    if (updatedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Session not found" });
@@ -126,9 +133,11 @@ exports.deleteSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
 
-    const deletedSession = await Session.findByIdAndDelete(sessionId);
+    const deletedCount = await Session.destroy({
+      where: { id: sessionId },
+    });
 
-    if (!deletedSession) {
+    if (deletedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Session not found" });
@@ -143,12 +152,12 @@ exports.deleteSession = async (req, res, next) => {
   }
 };
 
-/**
- * Render sessions only page with all sessions
- */
+// Render sessions only page with all sessions
 exports.renderSessionsOnlyPage = async (req, res, next) => {
   try {
-    const sessions = await Session.find().sort({ date: -1 });
+    const sessions = await Session.findAll({
+      order: [["date", "DESC"]],
+    });
     res.render("sessionsOnly", {
       sessions,
     });
@@ -157,13 +166,12 @@ exports.renderSessionsOnlyPage = async (req, res, next) => {
   }
 };
 
-/**
- * Render active sessions page with sessions that are not finished
- */
+// Render active sessions page with sessions that are not finished
 exports.renderActiveSessionsPage = async (req, res, next) => {
   try {
-    let sessions = await Session.find({ status: { $ne: "Closed" } }).sort({
-      date: -1,
+    let sessions = await Session.findAll({
+      where: { status: { [Op.ne]: "Closed" } },
+      order: [["date", "DESC"]],
     });
 
     // Calculate vote counts for each voting item
@@ -177,7 +185,7 @@ exports.renderActiveSessionsPage = async (req, res, next) => {
             ? item.votes.filter((v) => v === "no").length
             : 0;
           return {
-            ...item.toObject(),
+            ...item,
             yesVotes,
             noVotes,
           };
@@ -194,27 +202,22 @@ exports.renderActiveSessionsPage = async (req, res, next) => {
   }
 };
 
-/**
- * Add a topic to a session
- */
+// Add a topic to a session
 exports.addTopicToSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
     const { title, description } = req.body;
 
-    // Assuming Session model has a topics array field, if not, this needs to be added
-    const session = await Session.findById(sessionId);
+    const session = await Session.findByPk(sessionId);
     if (!session) {
       return res
         .status(404)
         .json({ success: false, message: "Session not found" });
     }
 
-    if (!session.topics) {
-      session.topics = [];
-    }
-
-    session.topics.push({ title, description });
+    const topics = session.topics || [];
+    topics.push({ title, description });
+    session.topics = topics;
     await session.save();
 
     res.status(201).json({
@@ -227,27 +230,22 @@ exports.addTopicToSession = async (req, res, next) => {
   }
 };
 
-/**
- * Add a voting item to a session
- */
+// Add a voting item to a session
 exports.addVotingItemToSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
     const { title, description } = req.body;
 
-    // Assuming Session model has a votingItems array field, if not, this needs to be added
-    const session = await Session.findById(sessionId);
+    const session = await Session.findByPk(sessionId);
     if (!session) {
       return res
         .status(404)
         .json({ success: false, message: "Session not found" });
     }
 
-    if (!session.votingItems) {
-      session.votingItems = [];
-    }
-
-    session.votingItems.push({ title, description, votes: [] }); // votes array to track member votes
+    const votingItems = session.votingItems || [];
+    votingItems.push({ title, description, votes: [] });
+    session.votingItems = votingItems;
     await session.save();
 
     res.status(201).json({
@@ -260,14 +258,12 @@ exports.addVotingItemToSession = async (req, res, next) => {
   }
 };
 
-/**
- * Submit a vote for a voting item in a session
- */
+// Submit a vote for a voting item in a session
 exports.submitVote = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
     const itemIndex = parseInt(req.params.itemIndex);
-    const { vote } = req.body; // expected 'yes' or 'no'
+    const { vote } = req.body;
 
     if (!["yes", "no"].includes(vote)) {
       return res
@@ -275,7 +271,7 @@ exports.submitVote = async (req, res, next) => {
         .json({ success: false, message: "Invalid vote value" });
     }
 
-    const session = await Session.findById(sessionId);
+    const session = await Session.findByPk(sessionId);
     if (!session) {
       return res
         .status(404)
@@ -293,9 +289,9 @@ exports.submitVote = async (req, res, next) => {
       votingItem.votes = [];
     }
 
-    // For simplicity, allow multiple votes; in real app, track voter identity to prevent duplicates
     votingItem.votes.push(vote);
 
+    session.votingItems[itemIndex] = votingItem;
     await session.save();
 
     res.status(200).json({
@@ -314,28 +310,31 @@ exports.searchSessions = async (req, res, next) => {
     const { sessionNumber, date, location, secretary, topic, status } =
       req.query;
 
-    const query = {};
+    const where = {};
 
     if (sessionNumber) {
-      query.sessionNumber = { $regex: sessionNumber, $options: "i" };
+      where.sessionNumber = { [Op.like]: `%${sessionNumber}%` };
     }
     if (date) {
-      query.date = new Date(date);
+      where.date = new Date(date);
     }
     if (location) {
-      query.location = { $regex: location, $options: "i" };
+      where.location = { [Op.like]: `%${location}%` };
     }
     if (secretary) {
-      query.secretary = { $regex: secretary, $options: "i" };
+      where.secretary = { [Op.like]: `%${secretary}%` };
     }
     if (topic) {
-      query.topic = { $regex: topic, $options: "i" };
+      where.topic = { [Op.like]: `%${topic}%` };
     }
     if (status) {
-      query.status = status;
+      where.status = status;
     }
 
-    const sessions = await Session.find(query).sort({ date: -1 });
+    const sessions = await Session.findAll({
+      where,
+      order: [["date", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,

@@ -1,27 +1,36 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const opinionPollSchema = new mongoose.Schema({
-  question: {
-    type: String,
-    required: true,
+const OpinionPoll = sequelize.define(
+  "OpinionPoll",
+  {
+    question: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    option1: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    option2: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "accepted", "rejected"),
+      allowNull: false,
+      defaultValue: "pending",
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  option1: {
-    type: String,
-    required: true,
-  },
-  option2: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    tableName: "OpinionPolls",
+    timestamps: false,
+  }
+);
 
-module.exports = mongoose.model("OpinionPoll", opinionPollSchema);
+module.exports = OpinionPoll;

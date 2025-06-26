@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>بيانات العضويه</title>
+    <link rel="stylesheet" href="/frontend/styles/style.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f6fff8;
+        min-height: 100vh;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        min-height: 100vh;
+        box-sizing: border-box;
+        background: linear-gradient(120deg, #e8f5e9 0%, #ffffff 100%);
+      }
+      .sidebar {
+        min-width: 220px;
+        background: #1b5e20;
+        color: #fff;
+        padding: 30px 15px;
+        border-radius: 0 20px 20px 0;
+        box-shadow: 2px 0 8px #0001;
+        height: 100vh;
+      }
+      .main-content {
+        flex: 1;
+        padding: 40px 40px 40px 40px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      h2 {
+        color: #1b5e20;
+        margin-bottom: 20px;
+      }
+      form.add-member-form,
+      form.edit-member-form {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px #0002;
+        padding: 30px 25px 20px 25px;
+        margin-bottom: 30px;
+        width: 100%;
+        max-width: 100%;
+      }
+      .add-member-form label,
+      .edit-member-form label {
+        color: #1b5e20;
+        font-weight: 500;
+      }
+      .add-member-form input,
+      .add-member-form select,
+      .edit-member-form input,
+      .edit-member-form select {
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        padding: 7px 10px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        width: 100%;
+        background: #f6fff8;
+        font-size: 1em;
+        transition: border 0.2s;
+      }
+      .add-member-form input:focus,
+      .add-member-form select:focus,
+      .edit-member-form input:focus,
+      .edit-member-form select:focus {
+        border: 1.5px solid #388e3c;
+        outline: none;
+      }
+      .add-member-form button,
+      .edit-member-form button,
+      button[onclick="printPage()"] {
+        background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 28px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        margin-right: 10px;
+        box-shadow: 0 2px 8px #0001;
+        transition: background 0.2s;
+      }
+      .add-member-form button:hover,
+      .edit-member-form button:hover,
+      button[onclick="printPage()"]:hover {
+        background: linear-gradient(90deg, #388e3c 0%, #43a047 100%);
+      }
+      .scroll-container {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        overflow: auto;
+        border: none;
+        padding: 0;
+        box-sizing: border-box;
+        background: none;
+      }
+      .add-member-form > div {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        width: 100%;
+      }
+      #searchInput {
+        margin-left: 20px;
+        padding: 10px 14px;
+        width: 260px;
+        height: 44px;
+        border-radius: 8px;
+        border: 1px solid #b2dfdb;
+        background: #f6fff8;
+        font-size: 1em;
+        transition: border 0.2s;
+      }
+      #searchInput:focus {
+        border: 1.5px solid #388e3c;
+        outline: none;
+      }
+      table#membersTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px #0001;
+      }
+      table#membersTable th,
+      table#membersTable td {
+        padding: 12px 10px;
+        text-align: center;
+        border-bottom: 1px solid #e0f2f1;
+      }
+      table#membersTable th {
+        background: #388e3c;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1em;
+      }
+      table#membersTable tr:last-child td {
+        border-bottom: none;
+      }
+      table#membersTable tr:nth-child(even) td {
+        background: #f1f8e9;
+      }
+      table#membersTable button {
+        background: #1b5e20;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 0.95em;
+        margin: 2px 2px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      table#membersTable button:hover {
+        background: #388e3c;
+      }
+      @media (max-width: 1200px) {
+        .main-content {
+          padding: 20px 5vw;
+        }
+        .add-member-form > div {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+      }
+      @media (max-width: 800px) {
+        .container {
+          flex-direction: column;
+        }
+        .sidebar {
+          min-width: 100%;
+          border-radius: 0 0 20px 20px;
+          height: auto;
+        }
+        .main-content {
+          padding: 20px 2vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+    <div class="container">
+      <div class="sidebar" style="margin-right: -20px; margin-top: -2px">
+        <%- include('../partials/sidebar') %>
+      </div>
+      <div class="main-content" style="overflow-y: auto; max-height: 100vh">
+        <div
+          class="scroll-container"
+          style="overflow-y: auto; max-height: 90vh"
+        >
+          <h1>بيانات العضويه</h1>
+          <form action="/profile/membership-data" method="POST">
+            <label
+              >نوع العضويه:
+              <input
+                type="text"
+                name="memberType"
+                value="<%= member.memberType %>"
+              /> </label
+            ><br />
+            <label
+              >رقم العضويه:
+              <input
+                type="text"
+                name="membershipNumber"
+                value="<%= member.membershipNumber %>"
+                readonly
+              /> </label
+            ><br />
+            <label
+              >رقم القرار:
+              <input
+                type="text"
+                name="councilCode"
+                value="<%= member.councilCode %>"
+              /> </label
+            ><br />
+            <label
+              >مبلغ الاشتراك السنوي:
+              <input
+                type="number"
+                name="annualSubscriptionAmount"
+                value="<%= member.annualSubscriptionAmount || '' %>"
+              /> </label
+            ><br />
+            <label
+              >تاريخ الانضمام:
+              <input
+                type="date"
+                name="joinDate"
+                value="<%= member.joinDate ? member.joinDate.toISOString().substring(0,10) : '' %>"
+              /> </label
+            ><br />
+            <label
+              >تاريخ الاشتراك:
+              <input
+                type="date"
+                name="subscriptionStartDate"
+                value="<%= member.subscriptionStartDate ? member.subscriptionStartDate.toISOString().substring(0,10) : '' %>"
+              /> </label
+            ><br />
+            <label
+              >تاريخ نهايه الاشتراك:
+              <input
+                type="date"
+                name="subscriptionEndDate"
+                value="<%= member.subscriptionEndDate ? member.subscriptionEndDate.toISOString().substring(0,10) : '' %>"
+              /> </label
+            ><br />
+            <label
+              >طريقه السداد:
+              <input
+                type="text"
+                name="paymentMethod"
+                value="<%= member.paymentMethod || '' %>"
+              /> </label
+            ><br />
+            <label
+              >اسم البنك:
+              <input
+                type="text"
+                name="bankName"
+                value="<%= member.bankName || '' %>"
+              /> </label
+            ><br />
+            <label
+              >رقم الحساب:
+              <input
+                type="text"
+                name="accountNumber"
+                value="<%= member.accountNumber || '' %>"
+              /> </label
+            ><br />
+            <label
+              >تاريخ التحديث:
+              <input
+                type="date"
+                name="updateDate"
+                value="<%= member.updateDate ? member.updateDate.toISOString().substring(0,10) : '' %>"
+              /> </label
+            ><br />
+            <button type="submit">حفظ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

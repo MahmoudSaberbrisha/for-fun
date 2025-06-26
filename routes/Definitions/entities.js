@@ -32,7 +32,7 @@ const asyncHandler = (fn) => (req, res, next) => {
 router.get(
   "/workdestinations",
   asyncHandler(async (req, res) => {
-    const items = await WorkDestination.find();
+    const items = await WorkDestination.findAll();
     res.render("workdestinations", { items, editItem: null });
   })
 );
@@ -43,8 +43,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, description } = req.body;
-    const item = new WorkDestination({ name, description });
-    await item.save();
+    await WorkDestination.create({ name, description });
     res.redirect("/api/workdestinations");
   })
 );
@@ -52,8 +51,8 @@ router.post(
 router.get(
   "/workdestinations/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await WorkDestination.find();
-    const editItem = await WorkDestination.findById(req.params.id);
+    const items = await WorkDestination.findAll();
+    const editItem = await WorkDestination.findByPk(req.params.id);
     res.render("workdestinations", { items, editItem });
   })
 );
@@ -64,10 +63,10 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, description } = req.body;
-    await WorkDestination.findByIdAndUpdate(req.params.id, {
-      name,
-      description,
-    });
+    await WorkDestination.update(
+      { name, description },
+      { where: { id: req.params.id } }
+    );
     res.redirect("/api/workdestinations");
   })
 );
@@ -75,7 +74,7 @@ router.post(
 router.post(
   "/workdestinations/delete/:id",
   asyncHandler(async (req, res) => {
-    await WorkDestination.findByIdAndDelete(req.params.id);
+    await WorkDestination.destroy({ where: { id: req.params.id } });
     res.redirect("/api/workdestinations");
   })
 );
@@ -84,7 +83,7 @@ router.post(
 router.get(
   "/membershiptypes",
   asyncHandler(async (req, res) => {
-    const items = await MembershipType.find();
+    const items = await MembershipType.findAll();
     res.render("membershiptypes", { items, editItem: null });
   })
 );
@@ -95,8 +94,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    const item = new MembershipType({ name });
-    await item.save();
+    await MembershipType.create({ name });
     res.redirect("/api/membershiptypes");
   })
 );
@@ -104,8 +102,8 @@ router.post(
 router.get(
   "/membershiptypes/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await MembershipType.find();
-    const editItem = await MembershipType.findById(req.params.id);
+    const items = await MembershipType.findAll();
+    const editItem = await MembershipType.findByPk(req.params.id);
     res.render("membershiptypes", { items, editItem });
   })
 );
@@ -116,7 +114,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    await MembershipType.findByIdAndUpdate(req.params.id, { name });
+    await MembershipType.update({ name }, { where: { id: req.params.id } });
     res.redirect("/api/membershiptypes");
   })
 );
@@ -124,7 +122,7 @@ router.post(
 router.post(
   "/membershiptypes/delete/:id",
   asyncHandler(async (req, res) => {
-    await MembershipType.findByIdAndDelete(req.params.id);
+    await MembershipType.destroy({ where: { id: req.params.id } });
     res.redirect("/api/membershiptypes");
   })
 );
@@ -133,7 +131,7 @@ router.post(
 router.get(
   "/memberjobs",
   asyncHandler(async (req, res) => {
-    const items = await MemberJob.find();
+    const items = await MemberJob.findAll();
     res.render("memberjobs", { items, editItem: null });
   })
 );
@@ -144,8 +142,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    const item = new MemberJob({ name });
-    await item.save();
+    await MemberJob.create({ name });
     res.redirect("/api/memberjobs");
   })
 );
@@ -153,8 +150,8 @@ router.post(
 router.get(
   "/memberjobs/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await MemberJob.find();
-    const editItem = await MemberJob.findById(req.params.id);
+    const items = await MemberJob.findAll();
+    const editItem = await MemberJob.findByPk(req.params.id);
     res.render("memberjobs", { items, editItem });
   })
 );
@@ -165,7 +162,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    await MemberJob.findByIdAndUpdate(req.params.id, { name });
+    await MemberJob.update({ name }, { where: { id: req.params.id } });
     res.redirect("/api/memberjobs");
   })
 );
@@ -173,7 +170,7 @@ router.post(
 router.post(
   "/memberjobs/delete/:id",
   asyncHandler(async (req, res) => {
-    await MemberJob.findByIdAndDelete(req.params.id);
+    await MemberJob.destroy({ where: { id: req.params.id } });
     res.redirect("/api/memberjobs");
   })
 );
@@ -182,7 +179,7 @@ router.post(
 router.get(
   "/membertitles",
   asyncHandler(async (req, res) => {
-    const items = await MemberTitle.find();
+    const items = await MemberTitle.findAll();
     res.render("membertitles", { items, editItem: null });
   })
 );
@@ -193,8 +190,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    const item = new MemberTitle({ name });
-    await item.save();
+    await MemberTitle.create({ name });
     res.redirect("/api/membertitles");
   })
 );
@@ -202,8 +198,8 @@ router.post(
 router.get(
   "/membertitles/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await MemberTitle.find();
-    const editItem = await MemberTitle.findById(req.params.id);
+    const items = await MemberTitle.findAll();
+    const editItem = await MemberTitle.findByPk(req.params.id);
     res.render("membertitles", { items, editItem });
   })
 );
@@ -214,7 +210,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    await MemberTitle.findByIdAndUpdate(req.params.id, { name });
+    await MemberTitle.update({ name }, { where: { id: req.params.id } });
     res.redirect("/api/membertitles");
   })
 );
@@ -222,7 +218,7 @@ router.post(
 router.post(
   "/membertitles/delete/:id",
   asyncHandler(async (req, res) => {
-    await MemberTitle.findByIdAndDelete(req.params.id);
+    await MemberTitle.destroy({ where: { id: req.params.id } });
     res.redirect("/api/membertitles");
   })
 );
@@ -231,7 +227,7 @@ router.post(
 router.get(
   "/meetingplaces",
   asyncHandler(async (req, res) => {
-    const items = await MeetingPlace.find();
+    const items = await MeetingPlace.findAll();
     res.render("meetingplaces", { items, editItem: null });
   })
 );
@@ -242,8 +238,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    const item = new MeetingPlace({ name });
-    await item.save();
+    await MeetingPlace.create({ name });
     res.redirect("/api/meetingplaces");
   })
 );
@@ -251,8 +246,8 @@ router.post(
 router.get(
   "/meetingplaces/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await MeetingPlace.find();
-    const editItem = await MeetingPlace.findById(req.params.id);
+    const items = await MeetingPlace.findAll();
+    const editItem = await MeetingPlace.findByPk(req.params.id);
     res.render("meetingplaces", { items, editItem });
   })
 );
@@ -263,7 +258,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    await MeetingPlace.findByIdAndUpdate(req.params.id, { name });
+    await MeetingPlace.update({ name }, { where: { id: req.params.id } });
     res.redirect("/api/meetingplaces");
   })
 );
@@ -271,7 +266,7 @@ router.post(
 router.post(
   "/meetingplaces/delete/:id",
   asyncHandler(async (req, res) => {
-    await MeetingPlace.findByIdAndDelete(req.params.id);
+    await MeetingPlace.destroy({ where: { id: req.params.id } });
     res.redirect("/api/meetingplaces");
   })
 );
@@ -280,7 +275,7 @@ router.post(
 router.get(
   "/cities",
   asyncHandler(async (req, res) => {
-    const items = await City.find();
+    const items = await City.findAll();
     res.render("cities", { items, editItem: null });
   })
 );
@@ -291,8 +286,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, order } = req.body;
-    const item = new City({ name, order });
-    await item.save();
+    await City.create({ name, order });
     res.redirect("/api/cities");
   })
 );
@@ -300,8 +294,8 @@ router.post(
 router.get(
   "/cities/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await City.find();
-    const editItem = await City.findById(req.params.id);
+    const items = await City.findAll();
+    const editItem = await City.findByPk(req.params.id);
     res.render("cities", { items, editItem });
   })
 );
@@ -312,7 +306,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, order } = req.body;
-    await City.findByIdAndUpdate(req.params.id, { name, order });
+    await City.update({ name, order }, { where: { id: req.params.id } });
     res.redirect("/api/cities");
   })
 );
@@ -320,7 +314,7 @@ router.post(
 router.post(
   "/cities/delete/:id",
   asyncHandler(async (req, res) => {
-    await City.findByIdAndDelete(req.params.id);
+    await City.destroy({ where: { id: req.params.id } });
     res.redirect("/api/cities");
   })
 );
@@ -329,8 +323,8 @@ router.post(
 router.get(
   "/neighborhoods",
   asyncHandler(async (req, res) => {
-    const items = await Neighborhood.find().populate("city");
-    const cities = await City.find();
+    const items = await Neighborhood.findAll({ include: City });
+    const cities = await City.findAll();
     res.render("neighborhoods", { items, cities, editItem: null });
   })
 );
@@ -341,8 +335,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, order, city } = req.body;
-    const item = new Neighborhood({ name, order, city });
-    await item.save();
+    await Neighborhood.create({ name, order, city });
     res.redirect("/api/neighborhoods");
   })
 );
@@ -350,9 +343,9 @@ router.post(
 router.get(
   "/neighborhoods/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await Neighborhood.find().populate("city");
-    const cities = await City.find();
-    const editItem = await Neighborhood.findById(req.params.id);
+    const items = await Neighborhood.findAll({ include: City });
+    const cities = await City.findAll();
+    const editItem = await Neighborhood.findByPk(req.params.id);
     res.render("neighborhoods", { items, cities, editItem });
   })
 );
@@ -363,7 +356,10 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name, order, city } = req.body;
-    await Neighborhood.findByIdAndUpdate(req.params.id, { name, order, city });
+    await Neighborhood.update(
+      { name, order, city },
+      { where: { id: req.params.id } }
+    );
     res.redirect("/api/neighborhoods");
   })
 );
@@ -371,7 +367,7 @@ router.post(
 router.post(
   "/neighborhoods/delete/:id",
   asyncHandler(async (req, res) => {
-    await Neighborhood.findByIdAndDelete(req.params.id);
+    await Neighborhood.destroy({ where: { id: req.params.id } });
     res.redirect("/api/neighborhoods");
   })
 );
@@ -380,7 +376,7 @@ router.post(
 router.get(
   "/suspensionreasons",
   asyncHandler(async (req, res) => {
-    const items = await MembershipSuspensionReason.find();
+    const items = await MembershipSuspensionReason.findAll();
     res.render("suspensionreasons", { items, editItem: null });
   })
 );
@@ -391,8 +387,7 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    const item = new MembershipSuspensionReason({ name });
-    await item.save();
+    await MembershipSuspensionReason.create({ name });
     res.redirect("/api/suspensionreasons");
   })
 );
@@ -400,8 +395,8 @@ router.post(
 router.get(
   "/suspensionreasons/edit/:id",
   asyncHandler(async (req, res) => {
-    const items = await MembershipSuspensionReason.find();
-    const editItem = await MembershipSuspensionReason.findById(req.params.id);
+    const items = await MembershipSuspensionReason.findAll();
+    const editItem = await MembershipSuspensionReason.findByPk(req.params.id);
     res.render("suspensionreasons", { items, editItem });
   })
 );
@@ -412,7 +407,10 @@ router.post(
   checkValidation,
   asyncHandler(async (req, res) => {
     const { name } = req.body;
-    await MembershipSuspensionReason.findByIdAndUpdate(req.params.id, { name });
+    await MembershipSuspensionReason.update(
+      { name },
+      { where: { id: req.params.id } }
+    );
     res.redirect("/api/suspensionreasons");
   })
 );
@@ -420,7 +418,7 @@ router.post(
 router.post(
   "/suspensionreasons/delete/:id",
   asyncHandler(async (req, res) => {
-    await MembershipSuspensionReason.findByIdAndDelete(req.params.id);
+    await MembershipSuspensionReason.destroy({ where: { id: req.params.id } });
     res.redirect("/api/suspensionreasons");
   })
 );
@@ -428,14 +426,14 @@ router.post(
 router.get(
   "/allentities",
   asyncHandler(async (req, res) => {
-    const workDestinations = await WorkDestination.find();
-    const membershipTypes = await MembershipType.find();
-    const memberJobs = await MemberJob.find();
-    const memberTitles = await MemberTitle.find();
-    const meetingPlaces = await MeetingPlace.find();
-    const cities = await City.find();
-    const neighborhoods = await Neighborhood.find().populate("city");
-    const suspensionReasons = await MembershipSuspensionReason.find();
+    const workDestinations = await WorkDestination.findAll();
+    const membershipTypes = await MembershipType.findAll();
+    const memberJobs = await MemberJob.findAll();
+    const memberTitles = await MemberTitle.findAll();
+    const meetingPlaces = await MeetingPlace.findAll();
+    const cities = await City.findAll();
+    const neighborhoods = await Neighborhood.findAll({ include: City });
+    const suspensionReasons = await MembershipSuspensionReason.findAll();
 
     res.render("allentities", {
       workDestinations,

@@ -1,13 +1,77 @@
 const Member = require("../models/Member");
-const mongoose = require("mongoose");
+const MemberJob = require("../models/MemberJob");
+const MembershipRequest = require("../models/MembershipRequest");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
+
+// Setup multer storage for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "..", "public", "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+exports.upload = multer({ storage: storage });
+
+// Helper function to generate unique membershipNumber
+async function generateUniqueMembershipNumber() {
+  let unique = false;
+  let membershipNumber = null;
+
+  while (!unique) {
+    membershipNumber = Math.floor(
+      10000000 + Math.random() * 90000000
+    ).toString();
+
+    const existing = await Member.findOne({ where: { membershipNumber } });
+    if (!existing) {
+      unique = true;
+    }
+  }
+
+  return membershipNumber;
+}
 
 exports.createMember = async (req, res, next) => {
   try {
     const {
-      membershipNumber,
       name,
+      gender,
+      nationality,
+      title,
+      maritalStatus,
       nationalIdNumber,
+      issuingAuthority,
+      issueDateHijri,
+      issueDateGregorian,
+      birthDateHijri,
+      birthDateGregorian,
+      age,
       phoneNumber,
+      secondaryPhoneNumber,
+      city,
+      neighborhood,
+      streetName,
+      nationalAddress,
+      email,
+      academicDegree,
+      academicQualifications,
+      workLifeExperience,
+      profession,
+      workEntity,
+      workAddress,
+      workPhone,
       memberType,
       status,
       subscriptionStartDate,
@@ -18,11 +82,45 @@ exports.createMember = async (req, res, next) => {
       shortName,
     } = req.body;
 
-    const newMember = new Member({
+    const personalPhoto =
+      req.files && req.files.personalPhoto
+        ? req.files.personalPhoto[0].filename
+        : null;
+    const idPhoto =
+      req.files && req.files.idPhoto ? req.files.idPhoto[0].filename : null;
+
+    const membershipNumber = await generateUniqueMembershipNumber();
+
+    const newMember = await Member.create({
       membershipNumber,
       name,
+      gender,
+      nationality,
+      title,
+      maritalStatus,
       nationalIdNumber,
+      issuingAuthority,
+      issueDateHijri,
+      issueDateGregorian,
+      birthDateHijri,
+      birthDateGregorian,
+      age,
       phoneNumber,
+      secondaryPhoneNumber,
+      city,
+      neighborhood,
+      streetName,
+      nationalAddress,
+      email,
+      academicDegree,
+      academicQualifications,
+      workLifeExperience,
+      profession,
+      workEntity,
+      workAddress,
+      workPhone,
+      personalPhoto,
+      idPhoto,
       memberType,
       status,
       subscriptionStartDate,
@@ -33,270 +131,9 @@ exports.createMember = async (req, res, next) => {
       shortName,
     });
 
-    await newMember.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Member created successfully",
-      data: newMember,
-    });
+    res.redirect("/api/members?message=Member added successfully");
   } catch (err) {
-    next(err);
-  }
-};
-
-// Render members page with list and empty edit form
-const Board = require("../models/Board");
-
-const MemberJob = require("../models/MemberJob");
-
-const MembershipRequest = require("../models/MembershipRequest");
-
-exports.renderMembersPage = async (req, res, next) => {
-  try {
-    const items = await Member.find();
-    const boards = await Board.find({}, "boardCode").sort({ createdAt: -1 });
-    const councilCodes = boards.map((board) => board.boardCode);
-
-    const memberJobs = await MemberJob.find({}, "name").sort({ createdAt: -1 });
-    const positions = memberJobs.map((job) => job.name);
-
-    const membershipRequests = await MembershipRequest.find().sort({
-      createdAt: -1,
-    });
-
-    res.render("members", {
-      items,
-      editItem: null,
-      councilCodes,
-      positions,
-      membershipRequests,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Render inactive members page with list and empty edit form
-exports.renderInactiveMembersPage = async (req, res, next) => {
-  try {
-    const items = await Member.find({ status: "Inactive" });
-    res.render("inactiveMembers", { items, editItem: null });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Render edit member page with list and edit form populated
-exports.renderEditMemberPage = async (req, res, next) => {
-  try {
-    const items = await Member.find();
-    const editItem = await Member.findById(req.params.id);
-    if (!editItem) {
-      return res.status(404).send("Member not found");
-    }
-    const membershipRequests = await MembershipRequest.find().sort({
-      createdAt: -1,
-    });
-    res.render("members", { items, editItem, membershipRequests });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Handle create member form submission and redirect to members page
-exports.handleCreateMemberForm = async (req, res, next) => {
-  try {
-    const {
-      membershipNumber,
-      name,
-      nationalIdNumber,
-      phoneNumber,
-      memberType,
-      status,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      councilCode,
-      position,
-      appointmentDateHijri,
-      shortName,
-    } = req.body;
-
-    const newMember = new Member({
-      membershipNumber,
-      name,
-      nationalIdNumber,
-      phoneNumber,
-      memberType,
-      status,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      councilCode,
-      position,
-      appointmentDateHijri,
-      shortName,
-    });
-
-    await newMember.save();
-
-    res.redirect("/api/members");
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Handle update member form submission and redirect to members page
-exports.handleUpdateMemberForm = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const updates = req.body || {};
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).send("Invalid member ID");
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).send("No update data provided");
-    }
-
-    const member = await Member.findById(id);
-    if (!member) {
-      return res.status(404).send("Member not found");
-    }
-
-    Object.keys(updates).forEach((key) => {
-      if (key === "nationalIdNumber") {
-        member[key] = Number(updates[key]);
-      } else {
-        member[key] = updates[key];
-      }
-    });
-
-    await member.save();
-
-    res.redirect("/api/members");
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Get all active members
-exports.getAllActiveMembers = async (req, res, next) => {
-  try {
-    const members = await Member.find({ status: "Active" }).sort({
-      createdAt: -1,
-    });
-
-    res.status(200).json({
-      success: true,
-      data: members,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Get all inactive members
-exports.getAllInactiveMembers = async (req, res, next) => {
-  try {
-    const members = await Member.find({ status: "Inactive" }).sort({
-      createdAt: -1,
-    });
-
-    res.status(200).json({
-      success: true,
-      data: members,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Search member by name or national ID
-exports.searchMember = async (req, res, next) => {
-  console.log(req.query);
-  try {
-    const query = req.query.query;
-    if (!query) {
-      return res.status(400).json({
-        success: false,
-        message: "Query parameter is required for search",
-      });
-    }
-
-    let searchCriteria = {};
-
-    if (/[\u0600-\u06FF]/.test(query)) {
-      searchCriteria = { name: { $regex: query, $options: "i" } }; // Case-insensitive search by name
-    } else {
-      searchCriteria = { membershipNumber: { $regex: query, $options: "i" } }; // Case-insensitive search by membership number
-    }
-
-    const members = await Member.find(searchCriteria);
-
-    res.status(200).json({
-      success: true,
-      data: members,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Update member by ID
-exports.updateMemberById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const updates = req.body || {}; // Ensure updates is an object even if body is empty
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid member ID",
-      });
-    }
-
-    // Check if updates object is empty
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No update data provided",
-      });
-    }
-
-    const member = await Member.findById(id);
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: "Member not found",
-      });
-    }
-
-    // Update only the fields that are present in the request
-    Object.keys(updates).forEach((key) => {
-      if (key === "nationalIdNumber") {
-        member[key] = Number(updates[key]);
-      } else {
-        member[key] = updates[key];
-      }
-    });
-
-    await member.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Member updated successfully",
-      data: member,
-    });
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(400).json({
-        success: false,
-        message: "Validation Error",
-        errors: Object.values(err.errors).map((e) => e.message),
-      });
-    }
-    if (err.code === 11000) {
+    if (err.name === "SequelizeUniqueConstraintError") {
       return res.status(400).json({
         success: false,
         message:
@@ -307,21 +144,152 @@ exports.updateMemberById = async (req, res, next) => {
   }
 };
 
-// Delete member by ID
-exports.deleteMemberById = async (req, res, next) => {
+exports.renderMembersPage = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const items = await Member.findAll();
+    const memberJobs = await MemberJob.findAll();
+    const positions = memberJobs.map((job) => job.name);
+    const generatedMembershipNumber = await generateUniqueMembershipNumber();
+    const membershipRequests = await MembershipRequest.findAll();
+    res.render("members", {
+      items,
+      editItem: null,
+      membershipRequests,
+      positions,
+      generatedMembershipNumber,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
-    const deletedMember = await Member.findByIdAndDelete(id);
+exports.renderInactiveMembersPage = async (req, res, next) => {
+  try {
+    const items = await Member.findAll({ where: { status: "Inactive" } });
+    res.render("inactiveMembers", { items, editItem: null });
+  } catch (err) {
+    next(err);
+  }
+};
 
-    if (!deletedMember) {
-      return res.status(404).json({
-        success: false,
-        message: "Member not found",
-      });
+exports.renderEditMemberPage = async (req, res, next) => {
+  try {
+    const items = await Member.findAll();
+    const editItem = await Member.findByPk(req.params.id);
+    if (!editItem) {
+      return res.status(404).send("Member not found");
+    }
+    const generatedMembershipNumber = await generateUniqueMembershipNumber();
+    const membershipRequests = await MembershipRequest.findAll();
+    res.render("members", {
+      items,
+      editItem,
+      generatedMembershipNumber,
+      membershipRequests,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.renderActiveMembersPage = async (req, res, next) => {
+  try {
+    const items = await Member.findAll({ where: { status: "Active" } });
+    res.render("activeMembers", { items, editItem: null });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllActiveMembers = async (req, res, next) => {
+  try {
+    const activeMembers = await Member.findAll({ where: { status: "Active" } });
+    res.json({ success: true, data: activeMembers });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllInactiveMembers = async (req, res, next) => {
+  try {
+    const inactiveMembers = await Member.findAll({
+      where: { status: "Inactive" },
+    });
+    res.json({ success: true, data: inactiveMembers });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.searchMember = async (req, res, next) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Query parameter is required" });
+    }
+    const results = await Member.findAll({
+      where: {
+        [Op.or]: [
+          { name: { [Op.like]: `%${query}%` } },
+          { membershipNumber: { [Op.like]: `%${query}%` } },
+        ],
+      },
+    });
+    res.json({ success: true, data: results });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateMemberById = async (req, res, next) => {
+  try {
+    const memberId = req.params.id;
+    const updateData = req.body;
+
+    if (req.files) {
+      if (req.files.personalPhoto) {
+        updateData.personalPhoto = req.files.personalPhoto[0].filename;
+      }
+      if (req.files.idPhoto) {
+        updateData.idPhoto = req.files.idPhoto[0].filename;
+      }
     }
 
-    res.status(200).json({
+    const [updatedCount, [updatedMember]] = await Member.update(updateData, {
+      where: { id: memberId },
+      returning: true,
+    });
+
+    if (updatedCount === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Member not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Member updated successfully",
+      data: updatedMember,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteMemberById = async (req, res, next) => {
+  try {
+    const memberId = req.params.id;
+    const deletedCount = await Member.destroy({ where: { id: memberId } });
+
+    if (deletedCount === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Member not found" });
+    }
+
+    res.json({
       success: true,
       message: "Member deleted successfully",
     });
@@ -330,47 +298,127 @@ exports.deleteMemberById = async (req, res, next) => {
   }
 };
 
-// Render active members page with list and empty edit form
-exports.renderActiveMembersPage = async (req, res, next) => {
+exports.handleUpdateMemberForm = async (req, res, next) => {
   try {
-    const items = await Member.find({ status: "Active" });
-    res.render("activeMembers", { items, editItem: null });
+    const memberId = req.params.id;
+    const updateData = req.body;
+
+    if (req.files) {
+      if (req.files.personalPhoto) {
+        updateData.personalPhoto = req.files.personalPhoto[0].filename;
+      }
+      if (req.files.idPhoto) {
+        updateData.idPhoto = req.files.idPhoto[0].filename;
+      }
+    }
+
+    const [updatedCount, [updatedMember]] = await Member.update(updateData, {
+      where: { id: memberId },
+      returning: true,
+    });
+
+    if (updatedCount === 0) {
+      return res.status(404).send("Member not found");
+    }
+
+    res.redirect("/definitions/members");
   } catch (err) {
     next(err);
   }
 };
 
-const jwt = require("jsonwebtoken");
-
-// Member login
 exports.loginMember = async (req, res, next) => {
   try {
-    const { membershipNumber, phoneNumber } = req.body;
-    if (!membershipNumber || !phoneNumber) {
-      return res.status(400).render("membershipLogin", {
-        errorMessage: "الرجاء إدخال رقم العضوية ورقم الجوال",
-      });
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Phone number is required" });
     }
 
-    const member = await Member.findOne({ membershipNumber, phoneNumber });
+    // Validate phone number format
+    const phoneRegex = /^966\d{9}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid phone number format" });
+    }
+
+    const member = await Member.findOne({ where: { phoneNumber } });
+
     if (!member) {
-      return res.status(401).render("membershipLogin", {
-        errorMessage: "بيانات الدخول غير صحيحة",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid phone number" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
-      { userId: member._id, memberType: member.memberType },
+      { userId: member.id, memberType: member.memberType },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1d" }
     );
 
-    // Set token in cookie (optional)
-    res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
+    res.cookie("token", token, { httpOnly: true, maxAge: 86400000 });
 
-    // Redirect to /api/members after successful login
     res.redirect("/api/members");
+  } catch (err) {
+    console.error("Error in loginMember:", err);
+    next(err);
+  }
+};
+
+// Render profile basic data page
+exports.renderBasicDataPage = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const member = await Member.findByPk(userId);
+    if (!member) {
+      return res.status(404).send("Member not found");
+    }
+    res.render("profile/basicData", { member });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Render profile membership data page
+exports.renderMembershipDataPage = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const member = await Member.findByPk(userId);
+    if (!member) {
+      return res.status(404).send("Member not found");
+    }
+    res.render("profile/membershipData", { member });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Render profile attachments page
+exports.renderAttachmentsPage = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const member = await Member.findByPk(userId);
+    if (!member) {
+      return res.status(404).send("Member not found");
+    }
+    res.render("profile/attachments", { member });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Render profile account data page
+exports.renderAccountDataPage = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const member = await Member.findByPk(userId);
+    if (!member) {
+      return res.status(404).send("Member not found");
+    }
+    res.render("profile/accountData", { member });
   } catch (err) {
     next(err);
   }

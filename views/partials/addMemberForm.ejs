@@ -1,0 +1,189 @@
+<form action="/api/members/create" method="POST" class="add-member-form" enctype="multipart/form-data">
+    <h2>
+        <%= t('members.addMemberHeader') || 'Add Member' %>
+    </h2>
+    <div>
+        <div>
+            <!-- Removed Council Code field -->
+        </div>
+        <div>
+            <label for="membershipNumber">رقم العضوية (سيتم إنشاؤه تلقائيًا):</label><br />
+            <input type="text" id="membershipNumber" name="membershipNumber" readonly
+                value="<%= generatedMembershipNumber %>" />
+        </div>
+        <div>
+            <label for="name">الاسم:</label><br />
+            <input type="text" id="name" name="name" required />
+        </div>
+        <div>
+            <label for="gender">الجنس:</label><br />
+            <select id="gender" name="gender" required>
+                <option value="" disabled selected>اختر الجنس</option>
+                <option value="Male">ذكر</option>
+                <option value="Female">أنثى</option>
+                <option value="Other">آخر</option>
+            </select>
+        </div>
+        <div>
+            <label for="nationality">الجنسية:</label><br />
+            <input type="text" id="nationality" name="nationality" required />
+        </div>
+        <div>
+            <label for="title">اللقب:</label><br />
+            <input type="text" id="title" name="title" required />
+        </div>
+        <div>
+            <label for="maritalStatus">الحالة الاجتماعية:</label><br />
+            <select id="maritalStatus" name="maritalStatus" required>
+                <option value="" disabled selected>اختر الحالة الاجتماعية</option>
+                <option value="Single">أعزب</option>
+                <option value="Married">متزوج</option>
+                <option value="Divorced">مطلق</option>
+                <option value="Widowed">أرمل</option>
+            </select>
+        </div>
+        <div>
+            <label for="nationalIdNumber">رقم الهوية الوطنية:</label><br />
+            <input type="text" id="nationalIdNumber" name="nationalIdNumber" title="يجب أن يكون 10 أرقام بالضبط"
+                required />
+        </div>
+        <div>
+            <label for="issuingAuthority">جهة الإصدار:</label><br />
+            <input type="text" id="issuingAuthority" name="issuingAuthority" required />
+        </div>
+        <div>
+            <label for="issueDateHijri">تاريخ الإصدار (هجري):</label><br />
+            <input type="text" id="issueDateHijri" name="issueDateHijri" required />
+        </div>
+        <div>
+            <label for="issueDateGregorian">تاريخ الإصدار (ميلادي):</label><br />
+            <input type="date" id="issueDateGregorian" name="issueDateGregorian" required />
+        </div>
+        <div>
+            <label for="birthDateHijri">تاريخ الميلاد (هجري):</label><br />
+            <input type="text" id="birthDateHijri" name="birthDateHijri" required />
+        </div>
+        <div>
+            <label for="birthDateGregorian">تاريخ الميلاد (ميلادي):</label><br />
+            <input type="date" id="birthDateGregorian" name="birthDateGregorian" required />
+        </div>
+        <div>
+            <label for="age">العمر:</label><br />
+            <input type="number" id="age" name="age" min="0" required />
+        </div>
+        <div>
+            <label for="phoneNumber">رقم الجوال:</label><br />
+            <input type="text" id="phoneNumber" name="phoneNumber" title="يجب أن يبدأ بـ 966 ويكون 12 رقمًا" required />
+        </div>
+        <div>
+            <label for="secondaryPhoneNumber">رقم جوال ثانوي:</label><br />
+            <input type="text" id="secondaryPhoneNumber" name="secondaryPhoneNumber" />
+        </div>
+        <div>
+            <label for="city">المدينة:</label><br />
+            <input type="text" id="city" name="city" required />
+        </div>
+        <div>
+            <label for="neighborhood">الحي:</label><br />
+            <input type="text" id="neighborhood" name="neighborhood" required />
+        </div>
+        <div>
+            <label for="streetName">اسم الشارع:</label><br />
+            <input type="text" id="streetName" name="streetName" required />
+        </div>
+        <div>
+            <label for="nationalAddress">العنوان الوطني:</label><br />
+            <input type="text" id="nationalAddress" name="nationalAddress" required />
+        </div>
+        <div>
+            <label for="email">البريد الإلكتروني:</label><br />
+            <input type="email" id="email" name="email" required />
+        </div>
+        <div>
+            <label for="academicDegree">الدرجة العلمية:</label><br />
+            <input type="text" id="academicDegree" name="academicDegree" required />
+        </div>
+        <div>
+            <label for="academicQualifications">المؤهلات الأكاديمية:</label><br />
+            <input type="text" id="academicQualifications" name="academicQualifications" required />
+        </div>
+        <div>
+            <label for="workLifeExperience">الخبرة العملية:</label><br />
+            <input type="text" id="workLifeExperience" name="workLifeExperience" required />
+        </div>
+        <div>
+            <label for="profession">المهنة:</label><br />
+            <input type="text" id="profession" name="profession" required />
+        </div>
+        <div>
+            <label for="workEntity">جهة العمل:</label><br />
+            <input type="text" id="workEntity" name="workEntity" required />
+        </div>
+        <div>
+            <label for="workAddress">عنوان العمل:</label><br />
+            <input type="text" id="workAddress" name="workAddress" required />
+        </div>
+        <div>
+            <label for="workPhone">هاتف العمل:</label><br />
+            <input type="text" id="workPhone" name="workPhone" required />
+        </div>
+        <div>
+            <label for="personalPhoto">الصورة الشخصية:</label><br />
+            <input type="file" id="personalPhoto" name="personalPhoto" accept="image/*" />
+        </div>
+        <div>
+            <label for="idPhoto">صورة الهوية:</label><br />
+            <input type="file" id="idPhoto" name="idPhoto" accept="image/*" />
+        </div>
+        <div>
+            <label for="memberType">نوع العضو:</label><br />
+            <select id="memberType" name="memberType" required>
+                <option value="Chairman">رئيس مجلس الإدارة</option>
+                <option value="BoardMember">عضو مجلس الإدارة</option>
+                <option value="Employee">موظف</option>
+                <option value="Other">آخر</option>
+            </select>
+        </div>
+        <div>
+            <label for="position">المنصب:</label><br />
+            <select id="position" name="position" required>
+                <option value="" disabled selected>اختر المنصب</option>
+                <% if (typeof positions !=='undefined' && positions.length> 0) { %>
+                    <% positions.forEach(function(pos) { %>
+                        <option value="<%= pos %>">
+                            <%= pos %>
+                        </option>
+                        <% }) %>
+                            <% } %>
+            </select>
+        </div>
+        <div>
+            <label for="appointmentDateHijri">تاريخ التعيين (هجري):</label><br />
+            <input type="date" id="appointmentDateHijri" name="appointmentDateHijri" required />
+        </div>
+        <div>
+            <label for="subscriptionStartDate">تاريخ التعيين (ميلادي):</label><br />
+            <input type="date" id="subscriptionStartDate" name="subscriptionStartDate" required />
+        </div>
+        <div>
+            <label for="subscriptionEndDate">تاريخ انتهاء الاشتراك:</label><br />
+            <input type="date" id="subscriptionEndDate" name="subscriptionEndDate" required />
+        </div>
+        <div>
+            <label for="status">الحالة:</label><br />
+            <select id="status" name="status" required>
+                <option value="Active">نشط</option>
+                <option value="Inactive">غير نشط</option>
+            </select>
+        </div>
+        <div>
+            <label for="shortName">الاسم المختصر:</label><br />
+            <input type="text" id="shortName" name="shortName" required />
+        </div>
+    </div>
+    <div>
+        <button type="submit">
+            <%= t('members.addButton') || 'Add Member' %>
+        </button>
+    </div>
+</form>

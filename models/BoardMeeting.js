@@ -1,76 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const boardMeetingSchema = new mongoose.Schema({
-  sessionNumber: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  day: {
-    type: String,
-    required: true,
-  },
-  time: {
-    type: String,
-    required: true,
-  },
-  duration: {
-    type: Number,
-    required: true,
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  secretary: {
-    type: String,
-    required: true,
-  },
-  topic: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-  },
-  description: {
-    type: String,
-  },
-  status: {
-    type: String,
-    enum: ["Open", "Closed"],
-    default: "Open",
-  },
-  topics: [
-    {
-      title: { type: String, required: true },
-      description: { type: String, required: true },
+const BoardMeeting = sequelize.define(
+  "BoardMeeting",
+  {
+    sessionNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
-  ],
-  votingItems: [
-    {
-      title: { type: String, required: true },
-      description: { type: String, required: true },
-      votes: [{ type: String, enum: ["yes", "no"] }],
-      followUpStatus: {
-        type: String,
-        enum: ["Pending", "In Progress", "Completed"],
-        default: "Pending",
-      },
-      followUpNotes: {
-        type: String,
-        default: "",
-      },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    day: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    time: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    secretary: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    topic: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("Open", "Closed"),
+      allowNull: false,
+      defaultValue: "Open",
+    },
   },
-});
+  {
+    tableName: "BoardMeetings",
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model("BoardMeeting", boardMeetingSchema);
+module.exports = BoardMeeting;

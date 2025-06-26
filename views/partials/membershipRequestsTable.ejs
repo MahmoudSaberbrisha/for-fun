@@ -1,0 +1,140 @@
+<h2>طلبات العضوية المعلقة</h2>
+<style>
+    #membershipRequestsTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px #0001;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #membershipRequestsTable th,
+    #membershipRequestsTable td {
+        padding: 12px 10px;
+        text-align: center;
+        border-bottom: 1px solid #e0f2f1;
+    }
+
+    #membershipRequestsTable th {
+        background: #388e3c;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1em;
+    }
+
+    #membershipRequestsTable tr:last-child td {
+        border-bottom: none;
+    }
+
+    #membershipRequestsTable tr:nth-child(even) td {
+        background: #f1f8e9;
+    }
+
+    #membershipRequestsTable tr:hover {
+        background-color: #dcedc8;
+    }
+
+    #membershipRequestsTable button {
+        background: #1b5e20;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 0.95em;
+        margin: 2px 2px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    #membershipRequestsTable button:hover {
+        background: #388e3c;
+    }
+
+    #noPendingRequestsRow {
+        background-color: #fff3cd;
+        color: #856404;
+        font-weight: 600;
+        font-size: 1.1em;
+        padding: 20px 0;
+    }
+</style>
+<table id="membershipRequestsTable" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>السجل المدني</th>
+            <th>الجنس</th>
+            <th>تاريخ الميلاد</th>
+            <th>المدينة</th>
+            <th>رقم الجوال</th>
+            <th>البريد الالكتروني</th>
+            <th>المؤهل العالي</th>
+            <th>المهنة</th>
+            <th>موظف على الكيان</th>
+            <th>مورد أو علاقة تعاقدية</th>
+            <th>تاريخ الطلب</th>
+            <th>الإجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (membershipRequests && membershipRequests.length> 0) { %>
+            <% membershipRequests.forEach(function(request) { %>
+                <tr>
+                    <td>
+                        <%= request.name %>
+                    </td>
+                    <td>
+                        <%= request.nationalIdNumber %>
+                    </td>
+                    <td>
+                        <%= request.gender %>
+                    </td>
+                    <td>
+                        <%= request.birthDate ? request.birthDate.toISOString().substring(0, 10) : '' %>
+                    </td>
+                    <td>
+                        <%= request.city %>
+                    </td>
+                    <td>
+                        <%= request.phoneNumber %>
+                    </td>
+                    <td>
+                        <%= request.email %>
+                    </td>
+                    <td>
+                        <%= request.education %>
+                    </td>
+                    <td>
+                        <%= request.profession %>
+                    </td>
+                    <td>
+                        <%= request.isEmployee ? 'نعم' : 'لا' %>
+                    </td>
+                    <td>
+                        <%= request.isSupplier ? 'نعم' : 'لا' %>
+                    </td>
+                    <td>
+                        <%= request.createdAt ? request.createdAt.toISOString().substring(0, 10) : '' %>
+                    </td>
+                    <td>
+                        <form action="/api/membership-requests/<%= request.id %>/accept" method="POST"
+                            style="display:inline;">
+                            <button type="submit">قبول الطلب</button>
+                        </form>
+                        <form action="/api/membership-requests/<%= request.id %>/reject" method="POST"
+                            style="display:inline;">
+                            <button type="submit">رفض الطلب</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+                    <% } else { %>
+                        <tr id="noPendingRequestsRow">
+                            <td colspan="13" style="text-align:center;">لا توجد طلبات معلقة</td>
+                        </tr>
+                        <% } %>
+    </tbody>
+</table>

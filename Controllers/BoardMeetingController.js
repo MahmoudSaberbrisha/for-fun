@@ -1,4 +1,7 @@
+const { Op } = require("sequelize");
 const BoardMeeting = require("../models/BoardMeeting");
+const Topic = require("../models/Topic");
+const VotingItem = require("../models/VotingItem");
 const { MeetingPlace } = require("../models/definitions");
 const Member = require("../models/Member");
 
@@ -19,7 +22,7 @@ exports.createBoardMeeting = async (req, res, next) => {
       status,
     } = req.body;
 
-    const newBoardMeeting = new BoardMeeting({
+    const newBoardMeeting = await BoardMeeting.create({
       sessionNumber,
       date,
       day,
@@ -32,8 +35,6 @@ exports.createBoardMeeting = async (req, res, next) => {
       description,
       status,
     });
-
-    await newBoardMeeting.save();
 
     res.status(201).json({
       success: true,
@@ -48,8 +49,9 @@ exports.createBoardMeeting = async (req, res, next) => {
 // Get all open board meetings
 exports.getOpenBoardMeetings = async (req, res, next) => {
   try {
-    const boardMeetings = await BoardMeeting.find({ status: "Open" }).sort({
-      date: -1,
+    const boardMeetings = await BoardMeeting.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
     });
 
     res.status(200).json({
@@ -64,16 +66,23 @@ exports.getOpenBoardMeetings = async (req, res, next) => {
 // Render board meetings page with open board meetings
 exports.renderBoardMeetingsPage = async (req, res, next) => {
   try {
-    const boardMeetings = await BoardMeeting.find({ status: "Open" }).sort({
-      date: -1,
+    const boardMeetings = await BoardMeeting.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
     });
-    const meetingPlaces = await MeetingPlace.find().sort({ name: 1 });
-    const members = await Member.find({ status: "Active" }).sort({ name: 1 });
+    const meetingPlaces = await MeetingPlace.findAll({
+      order: [["name", "ASC"]],
+    });
+    const members = await Member.findAll({
+      where: { status: "Active" },
+      order: [["name", "ASC"]],
+    });
 
     // Find the highest sessionNumber starting with 'M' and get the numeric part
-    const lastMeeting = await BoardMeeting.findOne({ sessionNumber: /^M\d+$/ })
-      .sort({ sessionNumber: -1 })
-      .exec();
+    const lastMeeting = await BoardMeeting.findOne({
+      where: { sessionNumber: { [Op.like]: "M%" } },
+      order: [["sessionNumber", "DESC"]],
+    });
 
     let nextSessionNumber = "M1";
     if (lastMeeting && lastMeeting.sessionNumber) {
@@ -97,8 +106,9 @@ exports.renderBoardMeetingsPage = async (req, res, next) => {
 // Render active board meetings page
 exports.renderActiveBoardMeetingsPage = async (req, res, next) => {
   try {
-    const boardMeetings = await BoardMeeting.find({ status: "Open" }).sort({
-      date: -1,
+    const boardMeetings = await BoardMeeting.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
     });
     res.render("boardMeetingsActive", {
       boardMeetings,
@@ -114,15 +124,15 @@ exports.updateBoardMeeting = async (req, res, next) => {
     const boardMeetingId = req.params.id;
     const updateData = req.body;
 
-    const updatedBoardMeeting = await BoardMeeting.findByIdAndUpdate(
-      boardMeetingId,
+    const [updatedCount, [updatedBoardMeeting]] = await BoardMeeting.update(
       updateData,
       {
-        new: true,
+        where: { id: boardMeetingId },
+        returning: true,
       }
     );
 
-    if (!updatedBoardMeeting) {
+    if (updatedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Board meeting not found" });
@@ -143,11 +153,11 @@ exports.deleteBoardMeeting = async (req, res, next) => {
   try {
     const boardMeetingId = req.params.id;
 
-    const deletedBoardMeeting = await BoardMeeting.findByIdAndDelete(
-      boardMeetingId
-    );
+    const deletedCount = await BoardMeeting.destroy({
+      where: { id: boardMeetingId },
+    });
 
-    if (!deletedBoardMeeting) {
+    if (deletedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Board meeting not found" });
@@ -168,20 +178,23 @@ exports.addTopic = async (req, res, next) => {
     const boardMeetingId = req.params.id;
     const { title, description } = req.body;
 
-    const boardMeeting = await BoardMeeting.findById(boardMeetingId);
+    const boardMeeting = await BoardMeeting.findByPk(boardMeetingId);
     if (!boardMeeting) {
       return res
         .status(404)
         .json({ success: false, message: "Board meeting not found" });
     }
 
-    boardMeeting.topics.push({ title, description });
-    await boardMeeting.save();
+    const newTopic = await Topic.create({
+      title,
+      description,
+      boardMeetingId,
+    });
 
     res.status(201).json({
       success: true,
       message: "Topic added successfully",
-      data: boardMeeting,
+      data: newTopic,
     });
   } catch (err) {
     next(err);
@@ -194,20 +207,24 @@ exports.addVotingItem = async (req, res, next) => {
     const boardMeetingId = req.params.id;
     const { title, description } = req.body;
 
-    const boardMeeting = await BoardMeeting.findById(boardMeetingId);
+    const boardMeeting = await BoardMeeting.findByPk(boardMeetingId);
     if (!boardMeeting) {
       return res
         .status(404)
         .json({ success: false, message: "Board meeting not found" });
     }
 
-    boardMeeting.votingItems.push({ title, description, votes: [] });
-    await boardMeeting.save();
+    const newVotingItem = await VotingItem.create({
+      title,
+      description,
+      votes: [],
+      boardMeetingId,
+    });
 
     res.status(201).json({
       success: true,
       message: "Voting item added successfully",
-      data: boardMeeting,
+      data: newVotingItem,
     });
   } catch (err) {
     next(err);
@@ -218,31 +235,31 @@ exports.addVotingItem = async (req, res, next) => {
 exports.vote = async (req, res, next) => {
   try {
     const boardMeetingId = req.params.id;
-    const { itemIndex, vote } = req.body;
+    const { itemId, vote } = req.body;
 
-    const boardMeeting = await BoardMeeting.findById(boardMeetingId);
-    if (!boardMeeting) {
+    const votingItem = await VotingItem.findOne({
+      where: { id: itemId, boardMeetingId },
+    });
+
+    if (!votingItem) {
       return res
         .status(404)
-        .json({ success: false, message: "Board meeting not found" });
+        .json({ success: false, message: "Voting item not found" });
     }
 
-    if (
-      !boardMeeting.votingItems[itemIndex] ||
-      (vote !== "yes" && vote !== "no")
-    ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid voting item or vote" });
+    if (vote !== "yes" && vote !== "no") {
+      return res.status(400).json({ success: false, message: "Invalid vote" });
     }
 
-    boardMeeting.votingItems[itemIndex].votes.push(vote);
-    await boardMeeting.save();
+    const votes = votingItem.votes || [];
+    votes.push(vote);
+    votingItem.votes = votes;
+    await votingItem.save();
 
     res.status(200).json({
       success: true,
       message: "Vote recorded successfully",
-      data: boardMeeting,
+      data: votingItem,
     });
   } catch (err) {
     next(err);
@@ -255,28 +272,12 @@ exports.searchBoardMeetings = async (req, res, next) => {
     const { sessionNumber, date, location, secretary, topic, status } =
       req.query;
 
-    const query = {};
+    const where = {};
 
-    if (sessionNumber) {
-      query.sessionNumber = { $regex: sessionNumber, $options: "i" };
-    }
-    if (date) {
-      query.date = new Date(date);
-    }
-    if (location) {
-      query.location = { $regex: location, $options: "i" };
-    }
-    if (secretary) {
-      query.secretary = { $regex: secretary, $options: "i" };
-    }
-    if (topic) {
-      query.topic = { $regex: topic, $options: "i" };
-    }
-    if (status) {
-      query.status = status;
-    }
-
-    const boardMeetings = await BoardMeeting.find(query).sort({ date: -1 });
+    const boardMeetings = await BoardMeeting.findAll({
+      where,
+      order: [["date", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
@@ -290,8 +291,9 @@ exports.searchBoardMeetings = async (req, res, next) => {
 // Render minutes and decisions page
 exports.renderMinutesDecisionsPage = async (req, res, next) => {
   try {
-    const boardMeetings = await BoardMeeting.find({ status: "Open" }).sort({
-      date: -1,
+    const boardMeetings = await BoardMeeting.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
     });
     res.render("boardMeetingsMinutes", {
       boardMeetings,
@@ -304,8 +306,9 @@ exports.renderMinutesDecisionsPage = async (req, res, next) => {
 // Render follow-up page
 exports.renderFollowUpPage = async (req, res, next) => {
   try {
-    const boardMeetings = await BoardMeeting.find({ status: "Open" }).sort({
-      date: -1,
+    const boardMeetings = await BoardMeeting.findAll({
+      where: { status: "Open" },
+      order: [["date", "DESC"]],
     });
     res.render("boardMeetingsFollowUp", {
       boardMeetings,
@@ -319,30 +322,27 @@ exports.renderFollowUpPage = async (req, res, next) => {
 exports.updateFollowUp = async (req, res, next) => {
   try {
     const boardMeetingId = req.params.id;
-    const { itemIndex, followUpStatus, followUpNotes } = req.body;
+    const { itemId, followUpStatus, followUpNotes } = req.body;
 
-    const boardMeeting = await BoardMeeting.findById(boardMeetingId);
-    if (!boardMeeting) {
+    const votingItem = await VotingItem.findOne({
+      where: { id: itemId, boardMeetingId },
+    });
+
+    if (!votingItem) {
       return res
         .status(404)
-        .json({ success: false, message: "Board meeting not found" });
+        .json({ success: false, message: "Voting item not found" });
     }
 
-    if (!boardMeeting.votingItems[itemIndex]) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid voting item index" });
-    }
+    votingItem.followUpStatus = followUpStatus;
+    votingItem.followUpNotes = followUpNotes;
 
-    boardMeeting.votingItems[itemIndex].followUpStatus = followUpStatus;
-    boardMeeting.votingItems[itemIndex].followUpNotes = followUpNotes;
-
-    await boardMeeting.save();
+    await votingItem.save();
 
     res.status(200).json({
       success: true,
       message: "Follow-up updated successfully",
-      data: boardMeeting,
+      data: votingItem,
     });
   } catch (err) {
     next(err);

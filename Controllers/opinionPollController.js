@@ -1,19 +1,17 @@
 const OpinionPoll = require("../models/OpinionPoll");
 
+// Create a new opinion poll
 exports.createOpinionPoll = async (req, res, next) => {
   const { question, option1, option2, status, createdAt } = req.body;
 
   try {
-    // Create a new opinion poll
-    const newPoll = new OpinionPoll({
+    const newPoll = await OpinionPoll.create({
       question,
       option1,
       option2,
       status: status || "pending",
-      createdAt: createdAt || Date.now(),
+      createdAt: createdAt || new Date(),
     });
-
-    await newPoll.save();
 
     res.status(201).json({ message: "Opinion poll created successfully" });
   } catch (err) {
@@ -21,27 +19,28 @@ exports.createOpinionPoll = async (req, res, next) => {
   }
 };
 
+// Get all opinion polls
 exports.getOpinionPolls = async (req, res, next) => {
   try {
-    const opinionPolls = await OpinionPoll.find();
+    const opinionPolls = await OpinionPoll.findAll();
     res.status(200).json(opinionPolls);
   } catch (err) {
     next(err);
   }
 };
 
+// Update poll status by ID
 exports.updatePollStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    const updatedPoll = await OpinionPoll.findByIdAndUpdate(
-      id,
+    const [updatedCount, [updatedPoll]] = await OpinionPoll.update(
       { status },
-      { new: true, runValidators: true }
+      { where: { id }, returning: true }
     );
 
-    if (!updatedPoll) {
+    if (updatedCount === 0) {
       return res.status(404).json({ message: "Opinion poll not found" });
     }
 
@@ -54,9 +53,10 @@ exports.updatePollStatus = async (req, res, next) => {
   }
 };
 
+// Render opinion polls view
 exports.renderOpinionPollsView = async (req, res, next) => {
   try {
-    const opinionPolls = await OpinionPoll.find();
+    const opinionPolls = await OpinionPoll.findAll();
     res.render("opinionPolls", { opinionPolls });
   } catch (err) {
     next(err);

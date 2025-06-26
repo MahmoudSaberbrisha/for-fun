@@ -1,18 +1,27 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const minuteSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
+const Minute = sequelize.define(
+  "Minute",
+  {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  content: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    tableName: "Minutes",
+    timestamps: false,
+  }
+);
 
-module.exports = mongoose.model("Minute", minuteSchema);
+module.exports = Minute;

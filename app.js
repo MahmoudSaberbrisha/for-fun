@@ -14,7 +14,7 @@ const votingRouter = require("./routes/Definitions/VotingRoute");
 const boardMeetingRouter = require("./routes/Definitions/BoardMeetingRoute");
 const attendanceRouter = require("./routes/Definitions/AttendanceRoute");
 const minuteRouter = require("./routes/Definitions/MinuteRoute");
-const mongoose = require("mongoose");
+const sequelize = require("./sequelize");
 const i18nMiddleware = require("./middleware/i18n");
 const { getBreakingNewsView } = require("./Controllers/breakingNewsController");
 const verifyToken = require("./middleware/verifyToken");
@@ -76,9 +76,11 @@ app.use("/api", votingRouter);
 app.use("/api", attendanceRouter);
 app.use("/api", minuteRouter);
 app.use("/", boardMeetingRouter);
+
 const opinionPollRouter = require("./routes/Definitions/OpinionPollRoute");
 const invitationRouter = require("./routes/Definitions/InvitationRoute");
 const discussionRouter = require("./routes/Definitions/DiscussionRoute");
+const citiesRouter = require("./routes/Definitions/CitiesRoute");
 
 app.use("/api/opinionPolls", opinionPollRouter);
 
@@ -87,6 +89,7 @@ app.use("/api", boardRouter);
 
 app.use("/", invitationRouter);
 app.use("/", discussionRouter);
+app.use("/", citiesRouter);
 
 // Redirect /api/inactiveMembers to /api/members/inactive
 app.get("/api/inactiveMembers", (req, res) => {
@@ -104,21 +107,21 @@ app.get("/boards", (req, res) => {
 
 async function connectToDatabase() {
   try {
-    await mongoose.connect(
-      "mongodb+srv://mido10sb:Ma7moudSaber@cluster0.noqx1.mongodb.net/migo?retryWrites=true&w=majority&appName=Cluster0",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
-    console.log("Connection with MongoDB is successful");
-    app.listen(8000, () => {
-      console.log("Server is running on port 8000");
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
+    console.log("Connection with MySQL is successful");
+    const port = process.env.PORT || 2000;
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
     });
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+    console.error("Error connecting to MySQL:", error);
   }
 }
+
+app.get("/", (req, res) => {
+  res.redirect("/membership-login");
+});
 
 app.get("/membership-login", (req, res) => {
   res.render("membershipLogin");

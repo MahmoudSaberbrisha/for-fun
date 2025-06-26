@@ -1,30 +1,36 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
-const votingSchema = new mongoose.Schema({
-  sessionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Session",
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-  options: [
-    {
-      optionText: String,
-      votes: { type: Number, default: 0 },
+const Voting = sequelize.define(
+  "Voting",
+  {
+    sessionId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-  ],
-  status: {
-    type: String,
-    enum: ["Open", "Closed"],
-    default: "Open",
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    options: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("Open", "Closed"),
+      allowNull: false,
+      defaultValue: "Open",
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    tableName: "Votings",
+    timestamps: false,
+  }
+);
 
-module.exports = mongoose.model("Voting", votingSchema);
+module.exports = Voting;

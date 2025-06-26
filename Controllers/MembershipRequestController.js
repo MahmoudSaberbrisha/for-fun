@@ -2,7 +2,9 @@ const MembershipRequest = require("../models/MembershipRequest");
 const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
+// Create a new membership request
 exports.createRequest = async (req, res) => {
   try {
     const {
@@ -26,7 +28,7 @@ exports.createRequest = async (req, res) => {
     }
 
     const existingRequest = await MembershipRequest.findOne({
-      nationalIdNumber,
+      where: { nationalIdNumber },
     });
     if (existingRequest) {
       return res
@@ -34,7 +36,7 @@ exports.createRequest = async (req, res) => {
         .render("membershipLogin", { error: "طلب العضوية موجود مسبقاً" });
     }
 
-    const newRequest = new MembershipRequest({
+    const newRequest = await MembershipRequest.create({
       name,
       nationalIdNumber,
       gender,
@@ -50,7 +52,6 @@ exports.createRequest = async (req, res) => {
       pledge: pledge === "on",
     });
 
-    await newRequest.save();
     res
       .status(201)
       .render("membershipLogin", { message: "تم تقديم طلب العضوية بنجاح" });
@@ -60,9 +61,12 @@ exports.createRequest = async (req, res) => {
   }
 };
 
+// Get all membership requests
 exports.getAllRequests = async (req, res) => {
   try {
-    const requests = await MembershipRequest.find().sort({ createdAt: -1 });
+    const requests = await MembershipRequest.findAll({
+      order: [["createdAt", "DESC"]],
+    });
     res.json(requests);
   } catch (error) {
     console.error("Error fetching membership requests:", error);
@@ -70,28 +74,47 @@ exports.getAllRequests = async (req, res) => {
   }
 };
 
-const { v4: uuidv4 } = require("uuid");
-
+// Accept a membership request and create a member
 exports.acceptRequest = async (req, res) => {
   try {
     const requestId = req.params.id;
-    const request = await MembershipRequest.findById(requestId);
+    if (!requestId) {
+      return res.status(400).json({ message: "Missing membership request id" });
+    }
+    const request = await MembershipRequest.findByPk(requestId);
     if (!request) {
       return res.redirect(
         "/api/members?message=" + encodeURIComponent("طلب العضوية غير موجود")
       );
     }
 
-    // Generate unique membership number using UUID
+    // Validate nationalIdNumber: must be exactly 10 digits
+    const nationalIdNumber = request.nationalIdNumber;
+    if (!/^\d{10}$/.test(nationalIdNumber)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid nationalIdNumber format" });
+    }
+
+    // Validate and sanitize phoneNumber: must start with 966 followed by 9 digits
+    let phoneNumber = request.phoneNumber;
+    if (!phoneNumber) {
+      return res.status(400).json({ message: "Missing phoneNumber" });
+    }
+    // Remove any non-digit characters
+    phoneNumber = phoneNumber.replace(/\D/g, "");
+    if (!/^966\d{9}$/.test(phoneNumber)) {
+      return res.status(400).json({ message: "Invalid phoneNumber format" });
+    }
+
     const membershipNumber = uuidv4();
 
-    // Create new member from request data
-    const newMember = new Member({
+    const newMember = await Member.create({
       membershipNumber: membershipNumber,
       name: request.name,
-      nationalIdNumber: Number(request.nationalIdNumber),
-      phoneNumber: request.phoneNumber,
-      memberType: "Other", // Default or adjust as needed
+      nationalIdNumber: nationalIdNumber,
+      phoneNumber: phoneNumber,
+      memberType: "Other",
       status: "Active",
       subscriptionStartDate: new Date(),
       subscriptionEndDate: new Date(
@@ -100,13 +123,10 @@ exports.acceptRequest = async (req, res) => {
       councilCode: "N/A",
       position: "N/A",
       appointmentDateHijri: "N/A",
-      shortName: request.name.substring(0, 10), // Short name from name
+      shortName: request.name.substring(0, 10),
     });
 
-    await newMember.save();
-
-    // Delete the membership request
-    await MembershipRequest.findByIdAndDelete(requestId);
+    await MembershipRequest.destroy({ where: { id: requestId } });
 
     res.redirect(
       "/api/members?message=" + encodeURIComponent("تم قبول الطلب وإضافة العضو")
@@ -117,18 +137,46 @@ exports.acceptRequest = async (req, res) => {
   }
 };
 
+// Reject a membership request
 exports.rejectRequest = async (req, res) => {
   try {
     const requestId = req.params.id;
-    const request = await MembershipRequest.findById(requestId);
+    if (!requestId) {
+      return res.status(400).json({ message: "Missing membership request id" });
+    }
+    const request = await MembershipRequest.findByPk(requestId);
     if (!request) {
       return res.redirect(
         "/api/members?message=" + encodeURIComponent("طلب العضوية غير موجود")
       );
     }
 
-    // Delete the membership request
-    await MembershipRequest.findByIdAndDelete(requestId);
+    await MembershipRequest.destroy({ where: { id: requestId } });
+
+    res.redirect(
+      "/api/members?message=" + encodeURIComponent("تم رفض الطلب وحذفه")
+    );
+  } catch (error) {
+    console.error("Error rejecting membership request:", error);
+    res.redirect("/api/members?message=" + encodeURIComponent("خطأ في الخادم"));
+  }
+};
+
+// Reject a membership request
+exports.rejectRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    if (!requestId) {
+      return res.status(400).json({ message: "Missing membership request id" });
+    }
+    const request = await MembershipRequest.findByPk(requestId);
+    if (!request) {
+      return res.redirect(
+        "/api/members?message=" + encodeURIComponent("طلب العضوية غير موجود")
+      );
+    }
+
+    await MembershipRequest.destroy({ where: { id: requestId } });
 
     res.redirect(
       "/api/members?message=" + encodeURIComponent("تم رفض الطلب وحذفه")

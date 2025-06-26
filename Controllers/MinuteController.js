@@ -5,12 +5,10 @@ exports.createMinute = async (req, res, next) => {
   try {
     const { title, content } = req.body;
 
-    const newMinute = new Minute({
+    const newMinute = await Minute.create({
       title,
       content,
     });
-
-    await newMinute.save();
 
     res.status(201).json({
       success: true,
@@ -25,7 +23,9 @@ exports.createMinute = async (req, res, next) => {
 // Get all minutes
 exports.getMinutes = async (req, res, next) => {
   try {
-    const minutes = await Minute.find().sort({ createdAt: -1 });
+    const minutes = await Minute.findAll({
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
@@ -42,11 +42,12 @@ exports.updateMinute = async (req, res, next) => {
     const minuteId = req.params.id;
     const updateData = req.body;
 
-    const updatedMinute = await Minute.findByIdAndUpdate(minuteId, updateData, {
-      new: true,
+    const [updatedCount, [updatedMinute]] = await Minute.update(updateData, {
+      where: { id: minuteId },
+      returning: true,
     });
 
-    if (!updatedMinute) {
+    if (updatedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Minute not found" });
@@ -67,9 +68,11 @@ exports.deleteMinute = async (req, res, next) => {
   try {
     const minuteId = req.params.id;
 
-    const deletedMinute = await Minute.findByIdAndDelete(minuteId);
+    const deletedCount = await Minute.destroy({
+      where: { id: minuteId },
+    });
 
-    if (!deletedMinute) {
+    if (deletedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Minute not found" });
